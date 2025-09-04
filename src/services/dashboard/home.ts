@@ -1,38 +1,21 @@
-'use server';
-import { cookies } from 'next/headers';
-import { DashboardHomeProps } from '@/app/(private)/dashboard/page';
-import { ServerFailed } from '@/errors/generics';
 import { Service } from '@/components/dashboard/recent-messages-table';
 import { Task } from '@/components/dashboard/tasks-card';
-import { fecthRequest } from '../config';
+import type { ServiceDataBarChartType } from '@/components/dashboard/services-bar-chart';
 
-export interface IHomeDashboardResponse {
-	data: DashboardHomeProps;
+export interface DashboardHomeProps {
+	tasks: Task[];
+	service: Service[];
+	MetricCardInfos: string[];
+	serviceBarNumbers: ServiceDataBarChartType[];
 }
 
-export async function getHomeInfos(): Promise<DashboardHomeProps> {
-	const cookieStore = await cookies();
-	const response = await fecthRequest({
-		url: '/dashboard/home',
-		method: 'GET',
-		token: `Bearer ${cookieStore.get('access_token')?.value}`,
-	});
+const STORAGE_KEY = 'dashboard-home-data';
 
-	if (response.status === 200) {
-		const data = (await response.json()) as DashboardHomeProps;
-		console.log(JSON.stringify(data));
-		return data;
-	}
+const randomNumber = (max: number, min = 0) =>
+	Math.floor(Math.random() * (max - min + 1)) + min;
 
-	const randomNumber = (max: number, min = 0) => {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	};
-
-	const makeDelay = (ms: number = 1000): Promise<void> => {
-		return new Promise((resolve) => setTimeout(resolve, ms));
-	};
-
-	const tasks: Task[] = [
+const DEFAULT_DATA: DashboardHomeProps = {
+	tasks: [
 		{
 			iconLink: 'https://github.com/mathteus.png',
 			label: 'Tarefa da sprint',
@@ -51,9 +34,8 @@ export async function getHomeInfos(): Promise<DashboardHomeProps> {
 			username: 'Amanda Souza',
 			time: new Date('2025-10-15T13:00:00'),
 		},
-	];
-
-	const services: Service[] = [
+	],
+	service: [
 		{
 			usuario: 'Heloísa Ribeiro',
 			status: 'Aguardando resposta',
@@ -79,15 +61,13 @@ export async function getHomeInfos(): Promise<DashboardHomeProps> {
 			status: 'Respondido',
 			mensagem: 'Lorem ipsum dolor sit amet consectetu...',
 		},
-	];
-
-	const MetricCardInfos = [
+	],
+	MetricCardInfos: [
 		'+17 em relação ao último mês',
 		'em relação ao último mês',
 		'Clique para visualizar as tarefas',
-	];
-
-	const serviceBarNumber = [
+	],
+	serviceBarNumbers: [
 		{ nome: 'Seg', atendimentos: randomNumber(30, 1) },
 		{ nome: 'Ter', atendimentos: randomNumber(30, 1) },
 		{ nome: 'Qua', atendimentos: randomNumber(30, 1) },
@@ -95,15 +75,30 @@ export async function getHomeInfos(): Promise<DashboardHomeProps> {
 		{ nome: 'Sex', atendimentos: randomNumber(30, 1) },
 		{ nome: 'Sab', atendimentos: randomNumber(30, 1) },
 		{ nome: 'Dom', atendimentos: randomNumber(30, 1) },
-	];
+	],
+};
 
-	await makeDelay(500);
-	return {
-		tasks,
-		service: services,
-		MetricCardInfos,
-		serviceBarNumbers: serviceBarNumber,
-	};
+export function loadHomeData(): DashboardHomeProps {
+	if (typeof window !== 'undefined') {
+		try {
+			const stored = localStorage.getItem(STORAGE_KEY);
+			if (stored) {
+				return JSON.parse(stored) as DashboardHomeProps;
+			}
+		} catch (error) {
+			console.error('Error loading home data from localStorage:', error);
+		}
+	}
 
-	// throw new ServerFailed();
+	return DEFAULT_DATA;
+}
+
+export function saveHomeData(data: DashboardHomeProps): void {
+	if (typeof window !== 'undefined') {
+		try {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+		} catch (error) {
+			console.error('Error saving home data to localStorage:', error);
+		}
+	}
 }

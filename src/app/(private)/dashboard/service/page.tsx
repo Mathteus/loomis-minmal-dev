@@ -8,8 +8,10 @@ import { ScheduledMessage } from '@/components/dashboard/services/dialog-schedul
 import { useScheduleDialogStore } from '@/contexts/schedule-message-dialog';
 import { useQuery } from '@tanstack/react-query';
 import { getContacts } from '@/services/dashboard/chat/contacts';
+import { useRequireAuth } from '@/hooks/use-require-auth';
 
 export default function ServicePage() {
+	useRequireAuth();
 	const [activeTab, setActiveTab] = useState<TabsType>('todos');
 	const [selectedContactId, setSelectedContactId] = useState<string | null>(
 		null,

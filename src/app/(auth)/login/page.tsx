@@ -57,6 +57,7 @@ export default function LoginPage() {
 		},
 		onError: errorFunc,
 		onSuccess: () => {
+			localStorage.setItem('loggedIn', 'true');
 			toast.success('Login realizado com sucesso!', {
 				duration: 2000,
 			});
