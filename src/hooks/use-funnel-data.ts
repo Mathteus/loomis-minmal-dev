@@ -167,28 +167,41 @@ export function useFunnelData() {
         notify: column.items.length
       };
     });
+    console.log('Setting columns to:', columnsWithUpdatedValues);
     setColumns(columnsWithUpdatedValues);
   };
 
-  // Move item between columns
+  // Move item between columns with immediate update
   const moveItem = (itemId: string, fromColumnId: string, toColumnId: string) => {
-    const updatedColumns = columns.map(column => ({ ...column }));
-    
-    const fromColumn = updatedColumns.find(col => col.id === fromColumnId);
-    const toColumn = updatedColumns.find(col => col.id === toColumnId);
-    
-    if (!fromColumn || !toColumn) return;
-    
-    const itemIndex = fromColumn.items.findIndex(item => item.id === itemId);
-    if (itemIndex === -1) return;
-    
-    const [movedItem] = fromColumn.items.splice(itemIndex, 1);
-    toColumn.items.push(movedItem);
-    
-    updateColumnValues(updatedColumns);
+    setColumns(prevColumns => {
+      const updatedColumns = prevColumns.map(column => ({ ...column, items: [...column.items] }));
+      
+      const fromColumn = updatedColumns.find(col => col.id === fromColumnId);
+      const toColumn = updatedColumns.find(col => col.id === toColumnId);
+      
+      if (!fromColumn || !toColumn) return prevColumns;
+      
+      const itemIndex = fromColumn.items.findIndex(item => item.id === itemId);
+      if (itemIndex === -1) return prevColumns;
+      
+      const [movedItem] = fromColumn.items.splice(itemIndex, 1);
+      toColumn.items.push(movedItem);
+      
+      // Update values for both columns
+      [fromColumn, toColumn].forEach(column => {
+        const columnTotal = column.items.reduce((sum, item) => {
+          const value = parseFloat(item.amount.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+          return sum + value;
+        }, 0);
+        column.value = `R$ ${columnTotal.toLocaleString('pt-BR')}`;
+        column.notify = column.items.length;
+      });
+      
+      return updatedColumns;
+    });
   };
 
-  // Add new opportunity
+  // Add new opportunity with immediate update
   const addOpportunity = (opportunity: Omit<PipeItem, 'id'>) => {
     console.log('addOpportunity called with:', opportunity);
     const newOpportunity: PipeItem = {
@@ -196,21 +209,31 @@ export function useFunnelData() {
       id: Date.now().toString()
     };
     
-    const updatedColumns = columns.map(column => {
-      if (column.id === 'abordagem') {
-        return {
-          ...column,
-          items: [...column.items, newOpportunity]
-        };
-      }
-      return column;
+    setColumns(prevColumns => {
+      const updatedColumns = prevColumns.map(column => {
+        if (column.id === 'abordagem') {
+          const newItems = [...column.items, newOpportunity];
+          const columnTotal = newItems.reduce((sum, item) => {
+            const value = parseFloat(item.amount.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+            return sum + value;
+          }, 0);
+          
+          return {
+            ...column,
+            items: newItems,
+            value: `R$ ${columnTotal.toLocaleString('pt-BR')}`,
+            notify: newItems.length
+          };
+        }
+        return column;
+      });
+      
+      console.log('Updated columns immediately:', updatedColumns);
+      return updatedColumns;
     });
-    
-    console.log('Updated columns:', updatedColumns);
-    updateColumnValues(updatedColumns);
   };
 
-  // Add new column
+  // Add new column with immediate update
   const addColumn = (columnData: { title: string }) => {
     const newColumn: FunnelColumn = {
       id: Date.now().toString(),
@@ -221,22 +244,32 @@ export function useFunnelData() {
       items: []
     };
     
-    setColumns([...columns, newColumn]);
+    setColumns(prevColumns => [...prevColumns, newColumn]);
   };
 
-  // Remove item
+  // Remove item with immediate update
   const removeItem = (itemId: string, columnId: string) => {
-    const updatedColumns = columns.map(column => {
-      if (column.id === columnId) {
-        return {
-          ...column,
-          items: column.items.filter(item => item.id !== itemId)
-        };
-      }
-      return column;
+    setColumns(prevColumns => {
+      const updatedColumns = prevColumns.map(column => {
+        if (column.id === columnId) {
+          const newItems = column.items.filter(item => item.id !== itemId);
+          const columnTotal = newItems.reduce((sum, item) => {
+            const value = parseFloat(item.amount.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+            return sum + value;
+          }, 0);
+          
+          return {
+            ...column,
+            items: newItems,
+            value: `R$ ${columnTotal.toLocaleString('pt-BR')}`,
+            notify: newItems.length
+          };
+        }
+        return column;
+      });
+      
+      return updatedColumns;
     });
-    
-    updateColumnValues(updatedColumns);
   };
 
   return {
