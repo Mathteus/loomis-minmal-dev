@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PipeItem } from '@/components/dashboard/funnel/pipe';
 
 export interface FunnelColumn {
@@ -116,35 +116,43 @@ const DEFAULT_COLUMNS: FunnelColumn[] = [
 const STORAGE_KEY = 'loomis-funnel-data';
 
 export function useFunnelData() {
-  const [columns, setColumns] = useState<FunnelColumn[]>(DEFAULT_COLUMNS);
+  const [columns, setColumns] = useState<FunnelColumn[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [forceUpdate, setForceUpdate] = useState(0);
 
   console.log('useFunnelData render, columns count:', columns.length);
 
-  // Load data from localStorage on mount
+  // Initialize with default data
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsedData = JSON.parse(stored) as unknown as FunnelColumn[];
         setColumns(parsedData);
+      } else {
+        // Set default columns if no stored data
+        setColumns(DEFAULT_COLUMNS);
       }
     } catch (error) {
       console.error('Error loading funnel data from localStorage:', error);
+      setColumns(DEFAULT_COLUMNS);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Save to localStorage whenever columns change
+  // Save to localStorage with throttling
   useEffect(() => {
-    if (!isLoading) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(columns));
-      } catch (error) {
-        console.error('Error saving funnel data to localStorage:', error);
-      }
+    if (!isLoading && columns.length > 0) {
+      const timeoutId = setTimeout(() => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(columns));
+        } catch (error) {
+          console.error('Error saving funnel data to localStorage:', error);
+        }
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [columns, isLoading]);
 
@@ -205,7 +213,7 @@ export function useFunnelData() {
   };
 
   // Add new opportunity with immediate update and force re-render
-  const addOpportunity = (opportunity: Omit<PipeItem, 'id'>) => {
+  const addOpportunity = useCallback((opportunity: Omit<PipeItem, 'id'>) => {
     console.log('addOpportunity called with:', opportunity);
     const newOpportunity: PipeItem = {
       ...opportunity,
@@ -231,17 +239,30 @@ export function useFunnelData() {
           console.log('Updated abordagem column:', updatedColumn);
           return updatedColumn;
         }
-        return column;
+        return { ...column };
       });
       
       console.log('All updated columns:', updatedColumns);
+      
+      // Force immediate localStorage save
+      setTimeout(() => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedColumns));
+        } catch (error) {
+          console.error('Error saving funnel data to localStorage:', error);
+        }
+      }, 0);
+      
       return updatedColumns;
     });
     
     // Force a re-render
-    setForceUpdate(prev => prev + 1);
-    console.log('Forced update triggered');
-  };
+    setForceUpdate(prev => {
+      const newValue = prev + 1;
+      console.log('Forced update triggered, new value:', newValue);
+      return newValue;
+    });
+  }, []);
 
   // Add new column with immediate update
   const addColumn = (columnData: { title: string }) => {

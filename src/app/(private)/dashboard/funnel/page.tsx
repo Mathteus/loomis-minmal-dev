@@ -39,6 +39,9 @@ export default function FunnelPage() {
   const [showConfigColumns, setShowConfigColumns] = useState<boolean>(false);
   const [showPopover, setShowPopover] = useState<boolean>(false);
   const [selectedPipeItem, setSelectedPipeItem] = useState<PipeItem | null>(null);
+  
+  // Force re-render trigger
+  const [renderKey, setRenderKey] = useState<number>(0);
 
   const {
     columns,
@@ -55,7 +58,13 @@ export default function FunnelPage() {
 
   const handleNewOpportunity = (opportunityData: Omit<PipeItem, 'id'>) => {
     console.log('handleNewOpportunity called with:', opportunityData);
+    
+    // Add the opportunity
     addOpportunity(opportunityData);
+    
+    // Force complete re-render
+    setRenderKey(prev => prev + 1);
+    
     console.log('addOpportunity completed, closing modal');
     setShowNewOpportunityModal(false);
     toast.success('Nova oportunidade adicionada!');
@@ -156,7 +165,10 @@ export default function FunnelPage() {
       {columns.length === 0 ? (
         <NoOpportunity />
       ) : (
-        <EnhancedKanbanBoard openProfilePipe={handleOpenProfile} />
+        <EnhancedKanbanBoard 
+          key={`kanban-${renderKey}-${columns.reduce((acc, col) => acc + col.items.length, 0)}`}
+          openProfilePipe={handleOpenProfile} 
+        />
       )}
 
       {/* Modals */}
