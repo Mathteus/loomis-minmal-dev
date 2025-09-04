@@ -1,7 +1,10 @@
 import { EllipsisVertical } from 'lucide-react';
 import styles from './pipe.module.css';
 import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import {
+	SortableContext,
+	verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { DraggablePipeItem } from './draggable-pipe-item';
 
 export type PipeItem = {
@@ -50,15 +53,18 @@ export function Pipe({
 				style={{ backgroundColor: colorHead }}
 				className={`text-white p-2 rounded-lg flex justify-between mb-4 items-center`}>
 				<div>
-					<h1 className="font-medium">{title}</h1>
-					<span className="text-sm opacity-90">{Value}</span>
+					<h1 className='font-medium'>{title}</h1>
+					<span className='text-sm opacity-90'>{Value}</span>
 				</div>
 				<div className='bg-[#FFFFFF29] flex p-3 rounded-full size-4 justify-center items-center text-xs'>
 					{notify}
 				</div>
 			</section>
 			<section>
-				<SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
+				<SortableContext
+					id={id}
+					items={items.map((item) => item.id)}
+					strategy={verticalListSortingStrategy}>
 					{items.map((item) => (
 						<DraggablePipeItem
 							key={item.id}
@@ -68,7 +74,7 @@ export function Pipe({
 					))}
 				</SortableContext>
 				{items.length === 0 && (
-					<div className="text-center py-8 text-gray-400 text-sm">
+					<div className='text-center py-8 text-gray-400 text-sm'>
 						Arraste cards aqui
 					</div>
 				)}
