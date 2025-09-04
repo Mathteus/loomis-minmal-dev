@@ -118,6 +118,9 @@ const STORAGE_KEY = 'loomis-funnel-data';
 export function useFunnelData() {
   const [columns, setColumns] = useState<FunnelColumn[]>(DEFAULT_COLUMNS);
   const [isLoading, setIsLoading] = useState(true);
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  console.log('useFunnelData render, columns count:', columns.length);
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -201,7 +204,7 @@ export function useFunnelData() {
     });
   };
 
-  // Add new opportunity with immediate update
+  // Add new opportunity with immediate update and force re-render
   const addOpportunity = (opportunity: Omit<PipeItem, 'id'>) => {
     console.log('addOpportunity called with:', opportunity);
     const newOpportunity: PipeItem = {
@@ -210,6 +213,7 @@ export function useFunnelData() {
     };
     
     setColumns(prevColumns => {
+      console.log('Previous columns:', prevColumns);
       const updatedColumns = prevColumns.map(column => {
         if (column.id === 'abordagem') {
           const newItems = [...column.items, newOpportunity];
@@ -218,19 +222,25 @@ export function useFunnelData() {
             return sum + value;
           }, 0);
           
-          return {
+          const updatedColumn = {
             ...column,
             items: newItems,
             value: `R$ ${columnTotal.toLocaleString('pt-BR')}`,
             notify: newItems.length
           };
+          console.log('Updated abordagem column:', updatedColumn);
+          return updatedColumn;
         }
         return column;
       });
       
-      console.log('Updated columns immediately:', updatedColumns);
+      console.log('All updated columns:', updatedColumns);
       return updatedColumns;
     });
+    
+    // Force a re-render
+    setForceUpdate(prev => prev + 1);
+    console.log('Forced update triggered');
   };
 
   // Add new column with immediate update
@@ -279,6 +289,7 @@ export function useFunnelData() {
     moveItem,
     addOpportunity,
     addColumn,
-    removeItem
+    removeItem,
+    forceUpdate // Include forceUpdate in return to help with debugging
   };
 }

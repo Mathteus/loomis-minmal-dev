@@ -54,7 +54,9 @@ export default function FunnelPage() {
   };
 
   const handleNewOpportunity = (opportunityData: Omit<PipeItem, 'id'>) => {
+    console.log('handleNewOpportunity called with:', opportunityData);
     addOpportunity(opportunityData);
+    console.log('addOpportunity completed, closing modal');
     setShowNewOpportunityModal(false);
     toast.success('Nova oportunidade adicionada!');
   };
