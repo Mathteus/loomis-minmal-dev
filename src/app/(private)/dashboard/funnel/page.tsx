@@ -1,4 +1,6 @@
 'use client';
+
+import React, { useState } from 'react';
 import {
 	Search,
 	SlidersHorizontal,
@@ -10,82 +12,54 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { NoOpportunity } from '@/components/dashboard/funnel/no-opportunity';
-import { useState } from 'react';
-import { NewOpportunityModal } from '@/components/dashboard/funnel/new-opportunity';
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
-import PipeItemDialog from '@/components/dashboard/funnel/pipe-item-dialog';
 import { CreatePipe } from '@/components/dashboard/funnel/create-pipe';
 import ConfigColumnsDialog from '@/components/dashboard/funnel/config-pipes';
-import { Pipe, PipeItem } from '@/components/dashboard/funnel/pipe';
+import { PipeItem } from '@/components/dashboard/funnel/pipe';
 import { useFunnelData } from '@/hooks/use-funnel-data';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { toast } from 'sonner';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 
+// Enhanced components
+import { EnhancedKanbanBoard } from '@/components/dashboard/funnel/enhanced-kanban-board';
+import { EnhancedNewOpportunityModal } from '@/components/dashboard/funnel/enhanced-new-opportunity-refactored';
+import { OpportunityDetailsModal } from '@/components/dashboard/funnel/opportunity-details-modal';
+
 export default function FunnelPage() {
 	useRequireAuth();
-	const [showNewOpportunity, setModalNewOpportunity] = useState<boolean>(false);
-	const [showPipeItem, setModalPipeItem] = useState<boolean>(false);
-	const [showCreatePipe, setModalCreatePipe] = useState<boolean>(false);
-	const [showConfigColumns, setModalConfigColumns] = useState<boolean>(false);
-	const [showProfile, setModalProfile] = useState<boolean>(false);
+
+	// State for modals
+	const [showNewOpportunityModal, setShowNewOpportunityModal] =
+		useState<boolean>(false);
+	const [showPipeItemModal, setShowPipeItemModal] = useState<boolean>(false);
+	const [showCreatePipe, setShowCreatePipe] = useState<boolean>(false);
+	const [showConfigColumns, setShowConfigColumns] = useState<boolean>(false);
 	const [showPopover, setShowPopover] = useState<boolean>(false);
-	const [selectedItem, setSelectedItem] = useState<PipeItem | null>(null);
+	const [selectedPipeItem, setSelectedPipeItem] = useState<PipeItem | null>(
+		null,
+	);
 
-	const {
-		columns,
-		totalValue,
-		isLoading,
-		moveItem,
-		addOpportunity,
-		addColumn,
-	} = useFunnelData();
-
-	const handleDragEnd = (event: DragEndEvent) => {
-		const { active, over } = event;
-
-		if (!over) return;
-
-		const activeId = active.id as string;
-		type OverData = { sortable: { containerId: string } };
-		const containerId = (over.data.current as OverData | undefined)?.sortable
-			.containerId;
-
-		if (!containerId) return;
-
-		// Find source column
-		const sourceColumn = columns.find((column) =>
-			column.items.some((item) => item.id === activeId),
-		);
-
-		if (!sourceColumn) return;
-
-		// If dropping on the same column, do nothing
-		if (sourceColumn.id === containerId) return;
-
-		// Move item to new column
-		moveItem(activeId, sourceColumn.id, containerId);
-		toast.success('Card movido com sucesso!');
-	};
+	const { columns, totalValue, isLoading, addOpportunity, addColumn } =
+		useFunnelData();
 
 	const handleOpenProfile = (item: PipeItem) => {
-		setSelectedItem(item);
-		setModalProfile(true);
+		setSelectedPipeItem(item);
+		setShowPipeItemModal(true);
 	};
 
 	const handleNewOpportunity = (opportunityData: Omit<PipeItem, 'id'>) => {
 		addOpportunity(opportunityData);
-		setModalNewOpportunity(false);
+		setShowNewOpportunityModal(false);
 		toast.success('Nova oportunidade adicionada!');
 	};
 
 	const handleCreatePipe = (pipeData: { title: string }) => {
 		addColumn(pipeData);
-		setModalCreatePipe(false);
+		setShowCreatePipe(false);
 		toast.success('Nova coluna criada!');
 	};
 
@@ -96,7 +70,7 @@ export default function FunnelPage() {
 					<div className='h-8 bg-gray-200 rounded w-1/4'></div>
 					<div className='flex gap-4 h-96'>
 						{[1, 2, 3, 4].map((i) => (
-							<div key={i} className='w-[16vw] bg-gray-200 rounded-lg'></div>
+							<div key={i} className='w-80 bg-gray-200 rounded-lg'></div>
 						))}
 					</div>
 				</div>
@@ -105,7 +79,8 @@ export default function FunnelPage() {
 	}
 
 	return (
-		<main className='p-6 space-y-6 bg-gray-50 w-full'>
+		<main className='flex-1 p-6 space-y-6 bg-gray-50 w-full dashboard-main'>
+			{/* Header */}
 			<section className='flex items-center justify-between'>
 				<h1 className='text-title-loomis'>Funil de vendas</h1>
 				<div className='flex items-center gap-2 rounded-md border bg-[#111B210F] px-4 py-2 text-sm text-gray-700 shadow-xs'>
@@ -116,6 +91,7 @@ export default function FunnelPage() {
 				</div>
 			</section>
 
+			{/* Controls */}
 			<section className='flex items-center gap-3'>
 				<div className='relative flex-1'>
 					<Search className='absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400' />
@@ -132,7 +108,7 @@ export default function FunnelPage() {
 				<Button
 					className='bg-green-loomis cursor-pointer hover:bg-green-loomis-light hover:text-green-loomis active:scale-90'
 					type='button'
-					onClick={() => setModalNewOpportunity(true)}>
+					onClick={() => setShowNewOpportunityModal(true)}>
 					<PlusCircle className='size-4' />
 					Nova oportunidade
 				</Button>
@@ -149,7 +125,7 @@ export default function FunnelPage() {
 								className='w-full hover:bg-transparent active:scale-90 cursor-pointer'
 								onClick={() => {
 									setShowPopover(false);
-									setModalConfigColumns(true);
+									setShowConfigColumns(true);
 								}}>
 								<SquarePen /> Configurar colunas
 							</Button>
@@ -160,75 +136,46 @@ export default function FunnelPage() {
 								className='w-full hover:bg-transparent hover:text-green-loomis active:scale-90 cursor-pointer'
 								onClick={() => {
 									setShowPopover(false);
-									setModalCreatePipe(true);
+									setShowCreatePipe(true);
 								}}>
-								Adcionar Funil <PlusCircle />
+								Adicionar Funil <PlusCircle />
 							</Button>
 						</div>
 					</PopoverContent>
 				</Popover>
 			</section>
 
-			{columns.length === 0 && <NoOpportunity />}
-
-			{columns.length > 0 && (
-				<DndContext
-					collisionDetection={closestCenter}
-					onDragEnd={handleDragEnd}>
-					<section className='flex gap-4 h-[80%] overflow-x-auto pb-4'>
-						{columns.map((column) => (
-							<Pipe
-								key={column.id}
-								id={column.id}
-								title={column.title}
-								Value={column.value}
-								notify={column.notify}
-								items={column.items}
-								colorHead={column.colorHead}
-								openProfilePipe={handleOpenProfile}
-							/>
-						))}
-					</section>
-				</DndContext>
+			{/* Kanban Board */}
+			{columns.length === 0 ? (
+				<NoOpportunity />
+			) : (
+				<EnhancedKanbanBoard openProfilePipe={handleOpenProfile} />
 			)}
 
-			{showNewOpportunity && (
-				<NewOpportunityModal
-					show={showNewOpportunity}
-					onClose={() => setModalNewOpportunity(false)}
-					onSubmit={handleNewOpportunity}
-				/>
-			)}
+			{/* Modals */}
+			<EnhancedNewOpportunityModal
+				onClose={() => setShowNewOpportunityModal(false)}
+				show={showNewOpportunityModal}
+				onSubmit={handleNewOpportunity}
+			/>
 
-			{showPipeItem && (
-				<PipeItemDialog
-					show={showPipeItem}
-					onClose={() => setModalPipeItem(false)}
-				/>
-			)}
+			<OpportunityDetailsModal
+				onClose={() => setShowPipeItemModal(false)}
+				show={showPipeItemModal}
+				item={selectedPipeItem}
+			/>
 
-			{showCreatePipe && (
-				<CreatePipe
-					show={showCreatePipe}
-					onClose={() => setModalCreatePipe(false)}
-					onSubmit={handleCreatePipe}
-				/>
-			)}
+			<CreatePipe
+				show={showCreatePipe}
+				onClose={() => setShowCreatePipe(false)}
+				onSubmit={handleCreatePipe}
+			/>
 
-			{showConfigColumns && (
-				<ConfigColumnsDialog
-					show={showConfigColumns}
-					onClose={() => setModalConfigColumns(false)}
-				/>
-			)}
-
-			{showProfile && selectedItem && (
-				<PipeItemDialog
-					show={showProfile}
-					onClose={() => setModalProfile(false)}
-					item={selectedItem}
-				/>
-			)}
+			<ConfigColumnsDialog
+				show={showConfigColumns}
+				onClose={() => setShowConfigColumns(false)}
+				onSubmit={addColumn}
+			/>
 		</main>
 	);
 }

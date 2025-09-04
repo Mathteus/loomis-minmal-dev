@@ -8,7 +8,7 @@ import { TasksCard } from '@/components/dashboard/tasks-card';
 import { Send, MessageCircle, User, ListTodo } from 'lucide-react';
 import { SkeletonHomeDashboard } from '@/components/dashboard/skeleton-home-dashboard';
 import { useQuery } from '@tanstack/react-query';
-import { getHomeInfos } from '@/services/dashboard/home';
+import { loadHomeData } from '@/services/dashboard/home';
 import { useSidebarLoadingStore } from '@/contexts/sidebar-loading';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 
@@ -19,7 +19,7 @@ export default function DashboardPage() {
 		queryKey: ['home-dash'],
 		queryFn: async () => {
 			setActiveSkeletonSidebar(true);
-			const data = await getHomeInfos();
+			const data = await loadHomeData();
 			setActiveSkeletonSidebar(false);
 			return data;
 		},

@@ -1,6 +1,6 @@
 import { Service } from '@/components/dashboard/recent-messages-table';
-import { ServiceDataBarChartType } from '@/components/dashboard/services-bar-chart';
 import { Task } from '@/components/dashboard/tasks-card';
+import { ServiceDataBarChartType } from '@/components/dashboard/services-bar-chart';
 
 export interface DashboardHomeProps {
 	tasks: Task[];
@@ -9,7 +9,7 @@ export interface DashboardHomeProps {
 	serviceBarNumbers: ServiceDataBarChartType[];
 }
 
-export async function getHomeInfos(): Promise<DashboardHomeProps> {
+export async function loadHomeData(): Promise<DashboardHomeProps> {
 	const randomNumber = (max: number, min = 0) => {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	};
@@ -83,10 +83,5 @@ export async function getHomeInfos(): Promise<DashboardHomeProps> {
 	};
 
 	await makeDelay(500);
-	return {
-		tasks: DEFAULT_DATA.tasks,
-		service: DEFAULT_DATA.service,
-		MetricCardInfos: DEFAULT_DATA.MetricCardInfos,
-		serviceBarNumbers: DEFAULT_DATA.serviceBarNumbers,
-	};
+	return DEFAULT_DATA;
 }
