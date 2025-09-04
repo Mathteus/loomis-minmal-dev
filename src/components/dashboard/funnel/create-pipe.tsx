@@ -19,7 +19,7 @@ export interface ICreatePipeProps {
 
 export function CreatePipe({ onClose, show, onSubmit }: ICreatePipeProps) {
 	const [pipeName, setPipeName] = useState<string>('');
-	
+
 	const handleSubmit = () => {
 		if (pipeName.trim() && onSubmit) {
 			onSubmit({ title: pipeName.trim() });
@@ -49,9 +49,9 @@ export function CreatePipe({ onClose, show, onSubmit }: ICreatePipeProps) {
 							Cancel
 						</Button>
 					</DialogClose>
-					<LoomisButton 
-						className='w-max' 
-						type='submit' 
+					<LoomisButton
+						className='w-max'
+						type='submit'
 						disabled={!pipeName.trim()}
 						onClick={handleSubmit}>
 						Criar Funil

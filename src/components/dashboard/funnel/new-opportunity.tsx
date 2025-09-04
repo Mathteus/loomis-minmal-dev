@@ -40,7 +40,7 @@ export function NewOpportunityModal({
 		phone: '',
 		amount: '',
 		message: '',
-		tags: ['Novo Lead']
+		tags: ['Novo Lead'],
 	});
 
 	const handleSubmit = () => {
@@ -50,14 +50,14 @@ export function NewOpportunityModal({
 				phone: formData.phone,
 				amount: formData.amount,
 				message: formData.message || 'Nova oportunidade criada',
-				tags: formData.tags
+				tags: formData.tags,
 			});
 			setFormData({
 				username: '',
 				phone: '',
 				amount: '',
 				message: '',
-				tags: ['Novo Lead']
+				tags: ['Novo Lead'],
 			});
 		}
 	};
@@ -116,15 +116,16 @@ export function NewOpportunityModal({
 
 				<div>
 					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Cliente</h2>
-					<Select onValueChange={(value) => {
-						// Find the contact by name and set both username and phone
-						const contact = data?.find(contact => contact.name === value);
-						setFormData(prev => ({ 
-							...prev, 
-							username: value,
-							phone: contact?.phone || ''
-						}));
-					}}>
+					<Select
+						onValueChange={(value) => {
+							// Find the contact by name and set both username and phone
+							const contact = data?.find((contact) => contact.name === value);
+							setFormData((prev) => ({
+								...prev,
+								username: value,
+								phone: contact?.phone || '',
+							}));
+						}}>
 						<SelectTrigger className='w-full cursor-pointer'>
 							<SelectValue placeholder='Selecione uma opção' />
 						</SelectTrigger>
@@ -159,7 +160,7 @@ export function NewOpportunityModal({
 						placeholder={toMoney(0)}
 						onChange={(e) => {
 							const value = MoneyMask(e.target.value);
-							setFormData(prev => ({ ...prev, amount: value }));
+							setFormData((prev) => ({ ...prev, amount: value }));
 						}}
 						value={formData.amount}
 					/>
@@ -167,11 +168,16 @@ export function NewOpportunityModal({
 				<div>
 					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Tags</h2>
 					<LoomisInputText
-						placeholder="Digite as tags separadas por vírgula"
-						onChange={(e) => setFormData(prev => ({ 
-							...prev, 
-							tags: e.target.value.split(',').map(tag => tag.trim()).filter(Boolean) 
-						}))}
+						placeholder='Digite as tags separadas por vírgula'
+						onChange={(e) =>
+							setFormData((prev) => ({
+								...prev,
+								tags: e.target.value
+									.split(',')
+									.map((tag) => tag.trim())
+									.filter(Boolean),
+							}))
+						}
 					/>
 				</div>
 			</main>
@@ -193,8 +199,8 @@ export function NewOpportunityModal({
 							Cancel
 						</Button>
 					</DialogClose>
-					<LoomisButton 
-						className='w-max' 
+					<LoomisButton
+						className='w-max'
 						type='submit'
 						disabled={!formData.username || !formData.amount}
 						onClick={handleSubmit}>

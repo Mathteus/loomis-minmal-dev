@@ -25,7 +25,6 @@ import { useFunnelData } from '@/hooks/use-funnel-data';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { toast } from 'sonner';
 
-
 export default function FunnelPage() {
 	const [showNewOpportunity, setModalNewOpportunity] = useState<boolean>(false);
 	const [showPipeItem, setModalPipeItem] = useState<boolean>(false);
@@ -35,14 +34,14 @@ export default function FunnelPage() {
 	const [showPopover, setShowPopover] = useState<boolean>(false);
 	const [selectedItem, setSelectedItem] = useState<PipeItem | null>(null);
 
-	const { 
-		columns, 
-		totalValue, 
-		isLoading, 
-		moveItem, 
-		addOpportunity, 
-		addColumn, 
-		removeItem 
+	const {
+		columns,
+		totalValue,
+		isLoading,
+		moveItem,
+		addOpportunity,
+		addColumn,
+		removeItem,
 	} = useFunnelData();
 
 	const handleDragEnd = (event: DragEndEvent) => {
@@ -54,8 +53,8 @@ export default function FunnelPage() {
 		const overId = over.id as string;
 
 		// Find source column
-		const sourceColumn = columns.find(column => 
-			column.items.some(item => item.id === activeId)
+		const sourceColumn = columns.find((column) =>
+			column.items.some((item) => item.id === activeId),
 		);
 
 		if (!sourceColumn) return;
@@ -88,11 +87,11 @@ export default function FunnelPage() {
 	if (isLoading) {
 		return (
 			<main className='p-6 space-y-6 bg-gray-50 w-full'>
-				<div className="animate-pulse space-y-6">
-					<div className="h-8 bg-gray-200 rounded w-1/4"></div>
-					<div className="flex gap-4 h-96">
-						{[1,2,3,4].map(i => (
-							<div key={i} className="w-[16vw] bg-gray-200 rounded-lg"></div>
+				<div className='animate-pulse space-y-6'>
+					<div className='h-8 bg-gray-200 rounded w-1/4'></div>
+					<div className='flex gap-4 h-96'>
+						{[1, 2, 3, 4].map((i) => (
+							<div key={i} className='w-[16vw] bg-gray-200 rounded-lg'></div>
 						))}
 					</div>
 				</div>
@@ -106,7 +105,9 @@ export default function FunnelPage() {
 				<h1 className='text-title-loomis'>Funil de vendas</h1>
 				<div className='flex items-center gap-2 rounded-md border bg-[#111B210F] px-4 py-2 text-sm text-gray-700 shadow-xs'>
 					<span className='text-gray-600'>Valor total do funil:</span>
-					<strong className='text-gray-900'>R$ {totalValue.toLocaleString('pt-BR')}</strong>
+					<strong className='text-gray-900'>
+						R$ {totalValue.toLocaleString('pt-BR')}
+					</strong>
 				</div>
 			</section>
 
@@ -164,9 +165,11 @@ export default function FunnelPage() {
 			</section>
 
 			{columns.length === 0 && <NoOpportunity />}
-			
+
 			{columns.length > 0 && (
-				<DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+				<DndContext
+					collisionDetection={closestCenter}
+					onDragEnd={handleDragEnd}>
 					<section className='flex gap-4 h-[80%] overflow-x-auto pb-4'>
 						{columns.map((column) => (
 							<Pipe
@@ -183,7 +186,7 @@ export default function FunnelPage() {
 					</section>
 				</DndContext>
 			)}
-			
+
 			{showNewOpportunity && (
 				<NewOpportunityModal
 					show={showNewOpportunity}

@@ -40,7 +40,9 @@ export default function PipeItemDialog({
 										alt={item?.username || 'Avatar'}
 									/>
 									<AvatarFallback className='bg-green-loomis text-white text-lg'>
-										{item?.username ? item.username.charAt(0).toUpperCase() : 'U'}
+										{item?.username
+											? item.username.charAt(0).toUpperCase()
+											: 'U'}
 									</AvatarFallback>
 								</Avatar>
 								<div>
@@ -55,7 +57,9 @@ export default function PipeItemDialog({
 
 							<div className='space-y-4'>
 								<div>
-									<p className='text-sm font-medium text-gray-700 mb-1'>Valor</p>
+									<p className='text-sm font-medium text-gray-700 mb-1'>
+										Valor
+									</p>
 									<p className='text-2xl font-bold text-green-loomis'>
 										{item?.amount || 'R$ 0,00'}
 									</p>
@@ -65,7 +69,10 @@ export default function PipeItemDialog({
 									<p className='text-sm font-medium text-gray-700 mb-2'>Tags</p>
 									<div className='flex flex-wrap gap-2'>
 										{item?.tags?.map((tag, index) => (
-											<Badge key={index} variant='secondary' className='bg-green-loomis-light text-green-loomis'>
+											<Badge
+												key={index}
+												variant='secondary'
+												className='bg-green-loomis-light text-green-loomis'>
 												{tag}
 											</Badge>
 										)) || <Badge variant='secondary'>Sem tags</Badge>}
@@ -73,7 +80,9 @@ export default function PipeItemDialog({
 								</div>
 
 								<div>
-									<p className='text-sm font-medium text-gray-700 mb-2'>Mensagem</p>
+									<p className='text-sm font-medium text-gray-700 mb-2'>
+										Mensagem
+									</p>
 									<p className='text-sm text-gray-600 bg-gray-50 p-3 rounded-lg'>
 										{item?.message || 'Nenhuma mensagem disponível'}
 									</p>
