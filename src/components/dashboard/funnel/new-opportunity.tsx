@@ -20,7 +20,7 @@ import { getContacts } from '@/services/dashboard/chat/contacts';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MoneyMask, toMoney } from '@/utils/utilities';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	fetchCollaborators,
 	Collaborator,
@@ -48,7 +48,7 @@ export function NewOpportunityModal({
 		collaboratorId: '',
 	});
 	const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-	const [amountRaw, setAmountRaw] = useState('');
+	const [amount, setAmount] = useState<string>('');
 	const [tagText, setTagText] = useState('');
 
 	useEffect(() => {
@@ -61,9 +61,9 @@ export function NewOpportunityModal({
 			onSubmit({
 				username: formData.username,
 				phone: formData.phone,
-				amount: formData.amount,
+				amount: amount,
 				message: formData.message || 'Nova oportunidade criada',
-				tags: formData.tags,
+				tags: tagText.split(','),
 			});
 			setFormData({
 				username: '',
@@ -73,8 +73,6 @@ export function NewOpportunityModal({
 				tags: ['Novo Lead'],
 				collaboratorId: '',
 			});
-			setAmountRaw('');
-			setTagText('');
 		}
 	};
 	const { data, isLoading } = useQuery({
@@ -123,112 +121,96 @@ export function NewOpportunityModal({
 		);
 	};
 
-	const BodyDialog = () => {
-		return (
-			<main className='flex flex-col gap-4'>
-				<hr className='border-gray-200 my-4' />
-
-				<div>
-					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Cliente</h2>
-					<Select
-						value={formData.username}
-						onValueChange={(value) => {
-							const contact = data?.find((contact) => contact.name === value);
-							setFormData((prev) => ({
-								...prev,
-								username: value,
-								phone: contact?.phone || '',
-							}));
-						}}>
-						<SelectTrigger className='w-full cursor-pointer'>
-							<SelectValue placeholder='Selecione uma opção' />
-						</SelectTrigger>
-						<SelectContent>
-							<Contacts />
-						</SelectContent>
-					</Select>
-					<p className='text-gray-400 my-2 text-details-loomis'>
-						Caso não encontre o cliente na lista, crie o contato dele aqui:{' '}
-						<button className='underline text-green-loomis cursor-pointer'>
-							Criar Contato
-						</button>{' '}
-					</p>
-				</div>
-				<div>
-					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>
-						Colaborador Vinculado
-					</h2>
-					<Select
-						value={formData.collaboratorId}
-						onValueChange={(value) =>
-							setFormData((prev) => ({
-								...prev,
-								collaboratorId: value,
-							}))
-						}>
-						<SelectTrigger className='w-full cursor-pointer'>
-							<SelectValue placeholder='Selecione uma opção' />
-						</SelectTrigger>
-						<SelectContent>
-							{collaborators.map((c) => (
-								<SelectItem key={c.id} className='cursor-pointer' value={c.id}>
-									{c.name}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-				<div>
-					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Valor</h2>
-					<LoomisInputText
-						type='text'
-						placeholder={toMoney(0)}
-						defaultValue={MoneyMask(amountRaw)}
-						onChange={(e) => {
-							const raw = e.target.value.replace(/\D/g, '');
-							setAmountRaw(raw);
-						}}
-						onBlur={(e) => {
-							const raw = e.target.value.replace(/\D/g, '');
-							setAmountRaw(raw);
-							setFormData((prev) => ({
-								...prev,
-								amount: MoneyMask(raw),
-							}));
-						}}
-					/>
-				</div>
-				<div>
-					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Tags</h2>
-					<LoomisInputText
-						placeholder='Digite as tags e pressione Enter ou vírgula'
-						onChange={(e) => setTagText(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter' || e.key === ',') {
-								e.preventDefault();
-								const newTag = tagText.trim();
-								if (newTag) {
-									setFormData((prev) => ({
-										...prev,
-										tags: [...prev.tags, newTag],
-									}));
-									setTagText('');
-								}
-							}
-						}}
-					/>
-				</div>
-			</main>
-		);
-	};
-
 	return (
 		<Dialog onOpenChange={onClose} modal={true} open={show}>
 			<DialogContent className='min-w-[30vw]'>
 				<DialogHeader>
 					<DialogTitle>Nova Oportunidade</DialogTitle>
 				</DialogHeader>
-				{isLoading ? <SkeletonDialog /> : <BodyDialog />}
+				{isLoading ? (
+					<SkeletonDialog />
+				) : (
+					<main className='flex flex-col gap-4'>
+						<hr className='border-gray-200 my-4' />
+
+						<div>
+							<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>
+								Cliente
+							</h2>
+							<Select
+								value={formData.username}
+								onValueChange={(value) => {
+									const contact = data?.find(
+										(contact) => contact.name === value,
+									);
+									setFormData((prev) => ({
+										...prev,
+										username: value,
+										phone: contact?.phone || '',
+									}));
+								}}>
+								<SelectTrigger className='w-full cursor-pointer'>
+									<SelectValue placeholder='Selecione uma opção' />
+								</SelectTrigger>
+								<SelectContent>
+									<Contacts />
+								</SelectContent>
+							</Select>
+							<p className='text-gray-400 my-2 text-details-loomis'>
+								Caso não encontre o cliente na lista, crie o contato dele aqui:{' '}
+								<button className='underline text-green-loomis cursor-pointer'>
+									Criar Contato
+								</button>{' '}
+							</p>
+						</div>
+						<div>
+							<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>
+								Colaborador Vinculado
+							</h2>
+							<Select
+								value={formData.collaboratorId}
+								onValueChange={(value) =>
+									setFormData((prev) => ({
+										...prev,
+										collaboratorId: value,
+									}))
+								}>
+								<SelectTrigger className='w-full cursor-pointer'>
+									<SelectValue placeholder='Selecione uma opção' />
+								</SelectTrigger>
+								<SelectContent>
+									{collaborators.map((c) => (
+										<SelectItem
+											key={c.id}
+											className='cursor-pointer'
+											value={c.id}>
+											{c.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<div>
+							<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>
+								Valor
+							</h2>
+							<LoomisInputText
+								type='text'
+								placeholder={toMoney(0)}
+								onChange={(e) => setAmount(MoneyMask(e.target.value))}
+								value={amount}
+							/>
+						</div>
+						<div>
+							<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Tags</h2>
+							<LoomisInputText
+								placeholder='Digite as tags e pressione Enter ou vírgula'
+								onChange={(e) => setTagText(e.target.value)}
+								value={tagText}
+							/>
+						</div>
+					</main>
+				)}
 				<DialogFooter>
 					<DialogClose asChild>
 						<Button
@@ -237,11 +219,7 @@ export function NewOpportunityModal({
 							Cancel
 						</Button>
 					</DialogClose>
-					<LoomisButton
-						className='w-max'
-						type='submit'
-						disabled={!formData.username || !formData.amount}
-						onClick={handleSubmit}>
+					<LoomisButton className='w-max' type='submit' onClick={handleSubmit}>
 						Adicionar oportunidade
 					</LoomisButton>
 				</DialogFooter>
