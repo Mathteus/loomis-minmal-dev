@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PipeItem } from '@/components/dashboard/funnel/pipe';
 
 export interface FunnelColumn {
@@ -116,32 +116,43 @@ const DEFAULT_COLUMNS: FunnelColumn[] = [
 const STORAGE_KEY = 'loomis-funnel-data';
 
 export function useFunnelData() {
-	const [columns, setColumns] = useState<FunnelColumn[]>(DEFAULT_COLUMNS);
+	const [columns, setColumns] = useState<FunnelColumn[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [forceUpdate, setForceUpdate] = useState(0);
 
-	// Load data from localStorage on mount
+	console.log('useFunnelData render, columns count:', columns.length);
+
+	// Initialize with default data
 	useEffect(() => {
 		try {
 			const stored = localStorage.getItem(STORAGE_KEY);
 			if (stored) {
 				const parsedData = JSON.parse(stored) as unknown as FunnelColumn[];
 				setColumns(parsedData);
+			} else {
+				// Set default columns if no stored data
+				setColumns(DEFAULT_COLUMNS);
 			}
 		} catch (error) {
 			console.error('Error loading funnel data from localStorage:', error);
+			setColumns(DEFAULT_COLUMNS);
 		} finally {
 			setIsLoading(false);
 		}
 	}, []);
 
-	// Save to localStorage whenever columns change
+	// Save to localStorage with throttling
 	useEffect(() => {
-		if (!isLoading) {
-			try {
-				localStorage.setItem(STORAGE_KEY, JSON.stringify(columns));
-			} catch (error) {
-				console.error('Error saving funnel data to localStorage:', error);
-			}
+		if (!isLoading && columns.length > 0) {
+			const timeoutId = setTimeout(() => {
+				try {
+					localStorage.setItem(STORAGE_KEY, JSON.stringify(columns));
+				} catch (error) {
+					console.error('Error saving funnel data to localStorage:', error);
+				}
+			}, 100);
+
+			return () => clearTimeout(timeoutId);
 		}
 	}, [columns, isLoading]);
 
@@ -169,52 +180,107 @@ export function useFunnelData() {
 				notify: column.items.length,
 			};
 		});
+		console.log('Setting columns to:', columnsWithUpdatedValues);
 		setColumns(columnsWithUpdatedValues);
 	};
 
-	// Move item between columns
+	// Move item between columns with immediate update
 	const moveItem = (
 		itemId: string,
 		fromColumnId: string,
 		toColumnId: string,
 	) => {
-		const updatedColumns = columns.map((column) => ({ ...column }));
+		setColumns((prevColumns) => {
+			const updatedColumns = prevColumns.map((column) => ({
+				...column,
+				items: [...column.items],
+			}));
 
-		const fromColumn = updatedColumns.find((col) => col.id === fromColumnId);
-		const toColumn = updatedColumns.find((col) => col.id === toColumnId);
+			const fromColumn = updatedColumns.find((col) => col.id === fromColumnId);
+			const toColumn = updatedColumns.find((col) => col.id === toColumnId);
 
-		if (!fromColumn || !toColumn) return;
+			if (!fromColumn || !toColumn) return prevColumns;
 
-		const itemIndex = fromColumn.items.findIndex((item) => item.id === itemId);
-		if (itemIndex === -1) return;
+			const itemIndex = fromColumn.items.findIndex(
+				(item) => item.id === itemId,
+			);
+			if (itemIndex === -1) return prevColumns;
 
-		const [movedItem] = fromColumn.items.splice(itemIndex, 1);
-		toColumn.items.push(movedItem);
+			const [movedItem] = fromColumn.items.splice(itemIndex, 1);
+			toColumn.items.push(movedItem);
 
-		updateColumnValues(updatedColumns);
+			// Update values for both columns
+			[fromColumn, toColumn].forEach((column) => {
+				const columnTotal = column.items.reduce((sum, item) => {
+					const value =
+						parseFloat(item.amount.replace(/[^\d,]/g, '').replace(',', '.')) ||
+						0;
+					return sum + value;
+				}, 0);
+				column.value = `R$ ${columnTotal.toLocaleString('pt-BR')}`;
+				column.notify = column.items.length;
+			});
+
+			return updatedColumns;
+		});
 	};
 
-	// Add new opportunity
-	const addOpportunity = (opportunity: Omit<PipeItem, 'id'>) => {
+	// Add new opportunity with immediate update and force re-render
+	const addOpportunity = useCallback((opportunity: Omit<PipeItem, 'id'>) => {
+		console.log('addOpportunity called with:', opportunity);
 		const newOpportunity: PipeItem = {
 			...opportunity,
 			id: Date.now().toString(),
 		};
 
-		const updatedColumns = columns.map((column) => {
-			if (column.id === 'abordagem') {
-				return {
-					...column,
-					items: [...column.items, newOpportunity],
-				};
-			}
-			return column;
+		setColumns((prevColumns) => {
+			console.log('Previous columns:', prevColumns);
+			const updatedColumns = prevColumns.map((column) => {
+				if (column.id === 'abordagem') {
+					const newItems = [...column.items, newOpportunity];
+					const columnTotal = newItems.reduce((sum, item) => {
+						const value =
+							parseFloat(
+								item.amount.replace(/[^\d,]/g, '').replace(',', '.'),
+							) || 0;
+						return sum + value;
+					}, 0);
+
+					const updatedColumn = {
+						...column,
+						items: newItems,
+						value: `R$ ${columnTotal.toLocaleString('pt-BR')}`,
+						notify: newItems.length,
+					};
+					console.log('Updated abordagem column:', updatedColumn);
+					return updatedColumn;
+				}
+				return { ...column };
+			});
+
+			console.log('All updated columns:', updatedColumns);
+
+			// Force immediate localStorage save
+			setTimeout(() => {
+				try {
+					localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedColumns));
+				} catch (error) {
+					console.error('Error saving funnel data to localStorage:', error);
+				}
+			}, 0);
+
+			return updatedColumns;
 		});
 
-		updateColumnValues(updatedColumns);
-	};
+		// Force a re-render
+		setForceUpdate((prev) => {
+			const newValue = prev + 1;
+			console.log('Forced update triggered, new value:', newValue);
+			return newValue;
+		});
+	}, []);
 
-	// Add new column
+	// Add new column with immediate update
 	const addColumn = (columnData: { title: string }) => {
 		const newColumn: FunnelColumn = {
 			id: Date.now().toString(),
@@ -225,22 +291,35 @@ export function useFunnelData() {
 			items: [],
 		};
 
-		setColumns([...columns, newColumn]);
+		setColumns((prevColumns) => [...prevColumns, newColumn]);
 	};
 
-	// Remove item
+	// Remove item with immediate update
 	const removeItem = (itemId: string, columnId: string) => {
-		const updatedColumns = columns.map((column) => {
-			if (column.id === columnId) {
-				return {
-					...column,
-					items: column.items.filter((item) => item.id !== itemId),
-				};
-			}
-			return column;
-		});
+		setColumns((prevColumns) => {
+			const updatedColumns = prevColumns.map((column) => {
+				if (column.id === columnId) {
+					const newItems = column.items.filter((item) => item.id !== itemId);
+					const columnTotal = newItems.reduce((sum, item) => {
+						const value =
+							parseFloat(
+								item.amount.replace(/[^\d,]/g, '').replace(',', '.'),
+							) || 0;
+						return sum + value;
+					}, 0);
 
-		updateColumnValues(updatedColumns);
+					return {
+						...column,
+						items: newItems,
+						value: `R$ ${columnTotal.toLocaleString('pt-BR')}`,
+						notify: newItems.length,
+					};
+				}
+				return column;
+			});
+
+			return updatedColumns;
+		});
 	};
 
 	return {
@@ -251,5 +330,6 @@ export function useFunnelData() {
 		addOpportunity,
 		addColumn,
 		removeItem,
+		forceUpdate, // Include forceUpdate in return to help with debugging
 	};
 }

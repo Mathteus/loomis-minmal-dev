@@ -104,16 +104,18 @@ export function EnhancedNewOpportunityModal({
 	);
 
 	const handleSubmit = useCallback(() => {
+		console.log('handleSubmit called with formData:', formData);
 		if (formData.username && formData.phone && formData.amount && onSubmit) {
-			onSubmit({
+			const opportunityData = {
 				username: formData.username,
 				phone: formData.phone,
 				amount: formData.amount,
 				message: formData.message || 'Nova oportunidade criada',
 				tags: formData.tags,
-			});
+			};
+			console.log('Calling onSubmit with:', opportunityData);
 
-			// Reset form
+			// Reset form first
 			setFormData({
 				username: '',
 				phone: '',
@@ -123,7 +125,21 @@ export function EnhancedNewOpportunityModal({
 				collaboratorId: '',
 			});
 			setTagInput('');
-			onClose();
+
+			// Call onSubmit and close modal
+			onSubmit(opportunityData);
+
+			// Close modal after a small delay to ensure state is updated
+			setTimeout(() => {
+				onClose();
+			}, 100);
+		} else {
+			console.log('Form validation failed:', {
+				username: formData.username,
+				phone: formData.phone,
+				amount: formData.amount,
+				onSubmit: !!onSubmit,
+			});
 		}
 	}, [formData, onSubmit, onClose]);
 

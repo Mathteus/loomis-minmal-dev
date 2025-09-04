@@ -44,7 +44,7 @@ export function EnhancedPipe({
 		<div
 			ref={setNodeRef}
 			style={dropZoneStyle}
-			className={`w-80 flex-shrink-0 funnel-column scrollbar-hide bg-gray-50 rounded-lg ${styles.HideScroolBar}`}>
+			className={`w-80 flex-shrink-0 bg-gray-50 rounded-lg ${styles.HideScroolBar}`}>
 			{/* Header */}
 			<div
 				style={{ backgroundColor: colorHead }}
@@ -59,14 +59,14 @@ export function EnhancedPipe({
 			</div>
 
 			{/* Items */}
-			<div className='px-4 pb-4 space-y-3'>
+			<div className='px-4 pb-4 space-y-3 funnel-column overflow-y-auto max-h-[500px]'>
 				<SortableContext
 					id={id}
 					items={items.map((item) => item.id)}
 					strategy={verticalListSortingStrategy}>
 					{items.map((item) => (
 						<EnhancedDraggableItem
-							key={item.id}
+							key={`item-${item.id}-${items.length}`}
 							item={item}
 							onItemClick={() => openProfilePipe(item)}
 						/>

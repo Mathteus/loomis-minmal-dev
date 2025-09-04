@@ -43,6 +43,9 @@ export default function FunnelPage() {
 		null,
 	);
 
+	// Force re-render trigger
+	const [renderKey, setRenderKey] = useState<number>(0);
+
 	const { columns, totalValue, isLoading, addOpportunity, addColumn } =
 		useFunnelData();
 
@@ -52,7 +55,15 @@ export default function FunnelPage() {
 	};
 
 	const handleNewOpportunity = (opportunityData: Omit<PipeItem, 'id'>) => {
+		console.log('handleNewOpportunity called with:', opportunityData);
+
+		// Add the opportunity
 		addOpportunity(opportunityData);
+
+		// Force complete re-render
+		setRenderKey((prev) => prev + 1);
+
+		console.log('addOpportunity completed, closing modal');
 		setShowNewOpportunityModal(false);
 		toast.success('Nova oportunidade adicionada!');
 	};
@@ -79,7 +90,7 @@ export default function FunnelPage() {
 	}
 
 	return (
-		<main className='flex-1 p-6 space-y-6 bg-gray-50 w-full dashboard-main'>
+		<main className='flex-1 p-6 space-y-6 bg-gray-50 w-full dashboard-main overflow-y-auto'>
 			{/* Header */}
 			<section className='flex items-center justify-between'>
 				<h1 className='text-title-loomis'>Funil de vendas</h1>
@@ -149,7 +160,10 @@ export default function FunnelPage() {
 			{columns.length === 0 ? (
 				<NoOpportunity />
 			) : (
-				<EnhancedKanbanBoard openProfilePipe={handleOpenProfile} />
+				<EnhancedKanbanBoard
+					key={`kanban-${renderKey}-${columns.reduce((acc, col) => acc + col.items.length, 0)}`}
+					openProfilePipe={handleOpenProfile}
+				/>
 			)}
 
 			{/* Modals */}

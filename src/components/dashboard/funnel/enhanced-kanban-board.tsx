@@ -30,9 +30,16 @@ interface EnhancedKanbanBoardProps {
 export function EnhancedKanbanBoard({
 	openProfilePipe,
 }: EnhancedKanbanBoardProps) {
-	const { columns, moveItem, isLoading } = useFunnelData();
+	const { columns, moveItem, isLoading, forceUpdate } = useFunnelData();
 	const [activeItem, setActiveItem] = useState<PipeItem | null>(null);
 	const [overId, setOverId] = useState<string | null>(null);
+
+	console.log(
+		'EnhancedKanbanBoard render with columns:',
+		columns.length,
+		'forceUpdate:',
+		forceUpdate,
+	);
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -126,14 +133,15 @@ export function EnhancedKanbanBoard({
 			onDragStart={handleDragStart}
 			onDragOver={handleDragOver}
 			onDragEnd={handleDragEnd}>
-			<div className='flex gap-4 p-4 h-full overflow-x-auto min-h-[600px]'>
+			<div className='flex gap-4 p-4 funnel-container overflow-x-auto min-h-[600px]'>
 				{columns.map((column) => (
 					<SortableContext
-						key={column.id}
+						key={`${column.id}-${forceUpdate}-${column.items.length}`}
 						id={column.id}
 						items={column.items.map((item) => item.id)}
 						strategy={verticalListSortingStrategy}>
 						<EnhancedPipe
+							key={`pipe-${column.id}-${forceUpdate}-${column.items.length}`}
 							id={column.id}
 							title={column.title}
 							Value={column.value}
