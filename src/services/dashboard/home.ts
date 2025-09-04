@@ -1,6 +1,8 @@
+
+import { DashboardHomeProps } from '@/app/(private)/dashboard/page';
 import { Service } from '@/components/dashboard/recent-messages-table';
 import { Task } from '@/components/dashboard/tasks-card';
-import type { ServiceDataBarChartType } from '@/components/dashboard/services-bar-chart';
+
 
 export interface DashboardHomeProps {
 	tasks: Task[];
@@ -9,10 +11,16 @@ export interface DashboardHomeProps {
 	serviceBarNumbers: ServiceDataBarChartType[];
 }
 
-const STORAGE_KEY = 'dashboard-home-data';
 
-const randomNumber = (max: number, min = 0) =>
-	Math.floor(Math.random() * (max - min + 1)) + min;
+export async function getHomeInfos(): Promise<DashboardHomeProps> {
+	const randomNumber = (max: number, min = 0) => {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	};
+
+	const makeDelay = (ms: number = 1000): Promise<void> => {
+		return new Promise((resolve) => setTimeout(resolve, ms));
+	};
+
 
 const DEFAULT_DATA: DashboardHomeProps = {
 	tasks: [
@@ -78,27 +86,13 @@ const DEFAULT_DATA: DashboardHomeProps = {
 	],
 };
 
-export function loadHomeData(): DashboardHomeProps {
-	if (typeof window !== 'undefined') {
-		try {
-			const stored = localStorage.getItem(STORAGE_KEY);
-			if (stored) {
-				return JSON.parse(stored) as DashboardHomeProps;
-			}
-		} catch (error) {
-			console.error('Error loading home data from localStorage:', error);
-		}
-	}
 
-	return DEFAULT_DATA;
-}
+	await makeDelay(500);
+	return {
+		tasks,
+		service: services,
+		MetricCardInfos,
+		serviceBarNumbers: serviceBarNumber,
+	};
 
-export function saveHomeData(data: DashboardHomeProps): void {
-	if (typeof window !== 'undefined') {
-		try {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-		} catch (error) {
-			console.error('Error saving home data to localStorage:', error);
-		}
-	}
 }

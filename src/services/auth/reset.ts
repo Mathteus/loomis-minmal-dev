@@ -1,21 +1,26 @@
-'use server';
 import { ServerFailed } from '@/errors/generics';
-import { cookies } from 'next/headers';
-import { fecthRequest } from '../config';
+import { getStoredUsers, setStoredUsers } from './storage';
+import { readJSON } from '../config';
 
-export async function resetPassword(newPassword: string) {
-	const cookieStore = await cookies();
-	const response = await fecthRequest({
-		url: '/auth/reset-password',
-		method: 'POST',
-		body: JSON.stringify({ newpassword: newPassword }),
-		token: cookieStore.get('access_token')?.value,
+export function resetPassword(newPassword: string) {
+	const { email } = readJSON<{ email: string; code: string }>('reset-code', {
+		email: '',
+		code: '',
 	});
-
-	if (response.status === 200) {
-		cookieStore.delete('access_token');
-		return true;
+	if (!email) {
+		throw new ServerFailed();
 	}
 
-	throw new ServerFailed();
+	const users = getStoredUsers();
+	const index = users.findIndex((u) => u.email === email);
+	if (index === -1) {
+		throw new ServerFailed();
+	}
+
+	users[index].password = newPassword;
+	setStoredUsers(users);
+	if (typeof window !== 'undefined') {
+		localStorage.removeItem('reset-code');
+	}
+	return true;
 }

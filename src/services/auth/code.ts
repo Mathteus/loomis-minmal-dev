@@ -1,30 +1,15 @@
-'use server';
 import { ServerFailed } from '@/errors/generics';
-import { cookies } from 'next/headers';
-import { fecthRequest } from '../config';
+import { readJSON } from '../config';
 
 interface ITokenResponse {
-	tokenTemp: string;
+	email: string;
+	code: string;
 }
 
-export async function verifyCode(codeRecovery: string) {
-	const cookieStore = await cookies();
-	const response = await fecthRequest({
-		url: '/auth/verify-code',
-		method: 'POST',
-		body: JSON.stringify({ code: codeRecovery }),
-		token: cookieStore.get('access_token')?.value,
-	});
-
-	if (response.status === 200) {
-		const cookieStore = await cookies();
-		const data = (await response.json()) as ITokenResponse;
-		cookieStore.set('access_token', String(data.tokenTemp));
+export function verifyCode(codeRecovery: string) {
+	const data = readJSON<ITokenResponse>('reset-code', { email: '', code: '' });
+	if (data.code === codeRecovery) {
 		return true;
 	}
-
-	const bodyError = await response.text();
-	console.log(response.status, bodyError);
-
 	throw new ServerFailed();
 }

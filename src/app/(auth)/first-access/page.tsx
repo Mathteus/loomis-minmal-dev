@@ -69,8 +69,8 @@ export default function FirstAccessPage() {
 	});
 	const { errors } = formState;
 	const { isError, error, isPending, mutateAsync } = useMutation({
-		mutationFn: async (currentUser: IHandlerNextStep) => {
-			await verifyCrendentials(currentUser.username, currentUser.email);
+		mutationFn: (currentUser: IHandlerNextStep) => {
+			verifyCrendentials(currentUser.username, currentUser.email);
 		},
 		onSuccess: () => {
 			setSelfData({
