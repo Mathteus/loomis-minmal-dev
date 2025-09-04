@@ -46,7 +46,7 @@ export function OpportunityDetailsModal({
 
   return (
     <Dialog open={show} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
+      <DialogContent className="min-w-[960px] min-h-[600px] max-w-5xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
         <DialogHeader className="pb-4 border-b">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-semibold">
