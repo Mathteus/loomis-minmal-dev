@@ -20,9 +20,9 @@ export default function DashboardPage() {
 	const { setActiveSkeletonSidebar } = useSidebarLoadingStore();
 	const { data, isPending } = useQuery({
 		queryKey: ['home-dash'],
-		queryFn: (): DashboardHomeProps => {
+		queryFn: async (): Promise<DashboardHomeProps> => {
 			setActiveSkeletonSidebar(true);
-			const data = loadHomeData();
+			const data = await loadHomeData();
 			setActiveSkeletonSidebar(false);
 			return data;
 		},
