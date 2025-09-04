@@ -26,7 +26,7 @@ import { useRequireAuth } from '@/hooks/use-require-auth';
 
 // Enhanced components
 import { EnhancedKanbanBoard } from '@/components/dashboard/funnel/enhanced-kanban-board';
-import { EnhancedNewOpportunityModal } from '@/components/dashboard/funnel/enhanced-new-opportunity';
+import EnhancedNewOpportunityModal from '@/components/dashboard/funnel/enhanced-new-opportunity-refactored';
 import { OpportunityDetailsModal } from '@/components/dashboard/funnel/opportunity-details-modal';
 
 export default function FunnelPage() {
@@ -81,7 +81,7 @@ export default function FunnelPage() {
   }
 
   return (
-    <main className="p-6 space-y-6 bg-gray-50 w-full">
+    <main className="main-content p-6 space-y-6 bg-gray-50 w-full">
       {/* Header */}
       <section className="flex items-center justify-between">
         <h1 className="text-title-loomis">Funil de vendas</h1>
@@ -179,6 +179,10 @@ export default function FunnelPage() {
       <ConfigColumnsDialog
         show={showConfigColumns}
         onClose={() => setShowConfigColumns(false)}
+        onAddColumn={(columnData) => {
+          addColumn(columnData);
+          toast.success('Nova coluna criada!');
+        }}
       />
     </main>
   );

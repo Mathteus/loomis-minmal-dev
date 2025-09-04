@@ -226,4 +226,36 @@
 		-moz-user-select: none;
 		-ms-user-select: none;
 	}
+	
+	/* Main content scroll without affecting sidebar */
+	.main-content {
+		height: 100vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+	
+	/* Funnel columns scroll */
+	.funnel-column {
+		max-height: calc(100vh - 200px);
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+	
+	.funnel-column::-webkit-scrollbar {
+		width: 6px;
+	}
+	
+	.funnel-column::-webkit-scrollbar-track {
+		background: #f1f5f9;
+		border-radius: 3px;
+	}
+	
+	.funnel-column::-webkit-scrollbar-thumb {
+		background: #cbd5e1;
+		border-radius: 3px;
+	}
+	
+	.funnel-column::-webkit-scrollbar-thumb:hover {
+		background: #94a3b8;
+	}
 }
