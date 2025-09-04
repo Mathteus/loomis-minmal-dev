@@ -1,10 +1,16 @@
+
 import { DashboardHomeProps } from '@/app/(private)/dashboard/page';
 import { Service } from '@/components/dashboard/recent-messages-table';
 import { Task } from '@/components/dashboard/tasks-card';
 
-export interface IHomeDashboardResponse {
-	data: DashboardHomeProps;
+
+export interface DashboardHomeProps {
+	tasks: Task[];
+	service: Service[];
+	MetricCardInfos: string[];
+	serviceBarNumbers: ServiceDataBarChartType[];
 }
+
 
 export async function getHomeInfos(): Promise<DashboardHomeProps> {
 	const randomNumber = (max: number, min = 0) => {
@@ -15,7 +21,9 @@ export async function getHomeInfos(): Promise<DashboardHomeProps> {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	};
 
-	const tasks: Task[] = [
+
+const DEFAULT_DATA: DashboardHomeProps = {
+	tasks: [
 		{
 			iconLink: 'https://github.com/mathteus.png',
 			label: 'Tarefa da sprint',
@@ -34,9 +42,8 @@ export async function getHomeInfos(): Promise<DashboardHomeProps> {
 			username: 'Amanda Souza',
 			time: new Date('2025-10-15T13:00:00'),
 		},
-	];
-
-	const services: Service[] = [
+	],
+	service: [
 		{
 			usuario: 'Heloísa Ribeiro',
 			status: 'Aguardando resposta',
@@ -62,15 +69,13 @@ export async function getHomeInfos(): Promise<DashboardHomeProps> {
 			status: 'Respondido',
 			mensagem: 'Lorem ipsum dolor sit amet consectetu...',
 		},
-	];
-
-	const MetricCardInfos = [
+	],
+	MetricCardInfos: [
 		'+17 em relação ao último mês',
 		'em relação ao último mês',
 		'Clique para visualizar as tarefas',
-	];
-
-	const serviceBarNumber = [
+	],
+	serviceBarNumbers: [
 		{ nome: 'Seg', atendimentos: randomNumber(30, 1) },
 		{ nome: 'Ter', atendimentos: randomNumber(30, 1) },
 		{ nome: 'Qua', atendimentos: randomNumber(30, 1) },
@@ -78,7 +83,9 @@ export async function getHomeInfos(): Promise<DashboardHomeProps> {
 		{ nome: 'Sex', atendimentos: randomNumber(30, 1) },
 		{ nome: 'Sab', atendimentos: randomNumber(30, 1) },
 		{ nome: 'Dom', atendimentos: randomNumber(30, 1) },
-	];
+	],
+};
+
 
 	await makeDelay(500);
 	return {
@@ -87,4 +94,5 @@ export async function getHomeInfos(): Promise<DashboardHomeProps> {
 		MetricCardInfos,
 		serviceBarNumbers: serviceBarNumber,
 	};
+
 }

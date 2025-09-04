@@ -14,8 +14,10 @@ import {
 	Tag,
 	Users,
 } from 'lucide-react';
+import { useRequireAuth } from '@/hooks/use-require-auth';
 
 export default function ContactsPage() {
+	useRequireAuth();
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
 	return (
