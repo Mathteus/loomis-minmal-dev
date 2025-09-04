@@ -50,6 +50,7 @@ export default function LoginPage() {
 
 	const { isPending, mutateAsync } = useMutation({
 		mutationFn: async (user: UserLogin) => {
+			// eslint-disable-next-line @typescript-eslint/await-thenable
 			await verifyLogin({
 				email: user.email,
 				password: user.password,
