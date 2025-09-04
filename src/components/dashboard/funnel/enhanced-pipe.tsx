@@ -41,7 +41,7 @@ export function EnhancedPipe({
     <div
       ref={setNodeRef}
       style={dropZoneStyle}
-      className={`w-80 flex-shrink-0 overflow-y-auto h-full bg-gray-50 rounded-lg ${styles.HideScroolBar}`}
+      className={`w-80 flex-shrink-0 funnel-column scrollbar-hide bg-gray-50 rounded-lg ${styles.HideScroolBar}`}
     >
       {/* Header */}
       <div

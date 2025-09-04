@@ -218,6 +218,30 @@
 		overflow-x: hidden;
 	}
 	
+	/* Main dashboard layout with scroll */
+	.dashboard-main {
+		height: 100vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+	
+	/* Funnel columns with scroll */
+	.funnel-column {
+		height: calc(100vh - 200px);
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+	
+	/* Hide scrollbar but keep functionality */
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
+	}
+	
 	/* Fix dialog cursor issues */
 	[data-slot="dialog-header"],
 	[data-slot="dialog-title"] {

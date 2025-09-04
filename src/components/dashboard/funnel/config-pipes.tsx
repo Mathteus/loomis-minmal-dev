@@ -17,11 +17,13 @@ import { X, Info, Trash, ArrowRight } from 'lucide-react';
 interface IConfigDialogProps {
 	onClose: () => void;
 	show: boolean;
+	onSubmit: (columnData: { title: string; colorHead: string }) => void;
 }
 
 export default function ConfigColumnsDialog({
 	onClose,
 	show,
+	onSubmit,
 }: IConfigDialogProps) {
 	const colourOptions: string[] = [
 		'#111b21',
@@ -171,8 +173,18 @@ export default function ConfigColumnsDialog({
 						Cancelar
 					</Button>
 					<Button
-						onClick={() => {}}
-						className='bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium'>
+						onClick={() => {
+							if (newColumnName.trim()) {
+								onSubmit({
+									title: newColumnName.trim(),
+									colorHead: selectedColour,
+								});
+								setNewColumnName('');
+								onClose();
+							}
+						}}
+						disabled={!newColumnName.trim()}
+						className='bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed'>
 						Salvar alterações
 					</Button>
 				</div>
