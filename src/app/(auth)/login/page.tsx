@@ -56,7 +56,12 @@ export default function LoginPage() {
 			});
 		},
 		onError: errorFunc,
-		onSuccess: () => router.push('/dashboard'),
+		onSuccess: () => {
+			toast.success('Login realizado com sucesso!', {
+				duration: 2000,
+			});
+			setTimeout(() => router.push('/dashboard'), 1000);
+		},
 	});
 
 	const handlerLogin = async (user: UserLogin) => {
