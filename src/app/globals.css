@@ -215,5 +215,15 @@
 	}
 	body {
 		@apply bg-background text-foreground;
+		overflow-x: hidden;
+	}
+	
+	/* Fix dialog cursor issues */
+	[data-slot="dialog-header"],
+	[data-slot="dialog-title"] {
+		user-select: none;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
 	}
 }

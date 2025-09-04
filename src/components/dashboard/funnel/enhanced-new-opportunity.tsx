@@ -199,6 +199,7 @@ export function EnhancedNewOpportunityModal({
                 amount: MoneyMask(amountRaw),
               }))
             }
+            autoComplete="off"
           />
         </div>
 

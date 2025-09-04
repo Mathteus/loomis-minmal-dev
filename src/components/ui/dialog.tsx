@@ -57,10 +57,15 @@ function DialogContent({
   React.useEffect(() => {
     const body = document.body;
     const originalOverflow = body.style.overflow;
+    const originalPaddingRight = body.style.paddingRight;
+    
+    // Prevent scroll lock by properly managing body overflow
     body.style.overflow = 'hidden';
     
     return () => {
+      // Properly restore original values
       body.style.overflow = originalOverflow;
+      body.style.paddingRight = originalPaddingRight;
     };
   }, []);
 
@@ -94,7 +99,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      className={cn("flex flex-col gap-2 text-center sm:text-left select-none", className)}
       {...props}
     />
   )
@@ -120,7 +125,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("text-lg leading-none font-semibold select-none", className)}
       {...props}
     />
   )
