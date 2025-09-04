@@ -1,27 +1,15 @@
-'use server';
-interface IconfigProps {
-	url: string;
-	method: 'POST' | 'GET' | 'PUT' | 'DELETE';
-	body?: string;
-	token?: string;
+export function readJSON<T>(key: string, fallback: T): T {
+	if (typeof window === 'undefined') return fallback;
+	const data = localStorage.getItem(key);
+	if (!data) return fallback;
+	try {
+		return JSON.parse(data) as T;
+	} catch {
+		return fallback;
+	}
 }
 
-export async function fecthRequest({ url, method, body, token }: IconfigProps) {
-	const headers: Record<string, string> = {
-		'Content-Type': 'application/json',
-	};
-
-	if (process.env.X_API_KEY) {
-		headers['x-api-key'] = process.env.X_API_KEY;
-	}
-
-	if (token) {
-		headers.Authorization = `Bearer ${token}`;
-	}
-
-	return await fetch(`${process.env.API_URL}${url}`, {
-		method,
-		headers,
-		body: body ?? null,
-	});
+export function writeJSON<T>(key: string, value: T): void {
+	if (typeof window === 'undefined') return;
+	localStorage.setItem(key, JSON.stringify(value));
 }

@@ -1,36 +1,28 @@
 'use client';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { QuickActionCard } from '@/components/dashboard/quick-action-card';
 import { MetricCard } from '@/components/dashboard/metric-card';
-import {
-	RecentMessagesTable,
-	Service,
-} from '@/components/dashboard/recent-messages-table';
-import {
-	ServiceBarChart,
-	ServiceDataBarChartType,
-} from '@/components/dashboard/services-bar-chart';
-import { Task, TasksCard } from '@/components/dashboard/tasks-card';
+import { RecentMessagesTable } from '@/components/dashboard/recent-messages-table';
+import { ServiceBarChart } from '@/components/dashboard/services-bar-chart';
+import { TasksCard } from '@/components/dashboard/tasks-card';
 import { Send, MessageCircle, User, ListTodo } from 'lucide-react';
 import { SkeletonHomeDashboard } from '@/components/dashboard/skeleton-home-dashboard';
 import { useQuery } from '@tanstack/react-query';
-import { getHomeInfos } from '@/services/dashboard/home';
+import {
+	loadHomeData,
+	type DashboardHomeProps,
+} from '@/services/dashboard/home';
 import { useSidebarLoadingStore } from '@/contexts/sidebar-loading';
-
-export interface DashboardHomeProps {
-	tasks: Task[];
-	service: Service[];
-	MetricCardInfos: string[];
-	serviceBarNumbers: ServiceDataBarChartType[];
-}
+import { useRequireAuth } from '@/hooks/use-require-auth';
 
 export default function DashboardPage() {
+	useRequireAuth();
 	const { setActiveSkeletonSidebar } = useSidebarLoadingStore();
 	const { data, isPending } = useQuery({
 		queryKey: ['home-dash'],
-		queryFn: async (): Promise<DashboardHomeProps> => {
+		queryFn: (): DashboardHomeProps => {
 			setActiveSkeletonSidebar(true);
-			const data = await getHomeInfos();
+			const data = loadHomeData();
 			setActiveSkeletonSidebar(false);
 			return data;
 		},
