@@ -1,0 +1,58 @@
+.rce-button {
+	background: transparent !important;
+	color: #238e52 !important;
+	font-size: smaller !important;
+	font-weight: 700 !important;
+	transition: all 350ms ease-in-out !important;
+	:active {
+		scale: 1.2 !important;
+	}
+}
+
+/* Keep text the same gray on interaction */
+.rce-button:hover,
+.rce-button:focus,
+.rce-button:active {
+	color: #85888e !important;
+}
+
+/* In case the library renders anchors inside buttons */
+.rce-button a,
+.rce-button a:hover,
+.rce-button a:focus,
+.rce-button a:active {
+	color: #85888e !important;
+}
+
+/* Ensure dropdown menu text never turns blue on hover */
+/* Target common react-chat-elements dropdown containers and items */
+/* .rce-dropdown, */
+/* .rce-container-dropdown, */
+/* .rce-dropdown-menu, */
+/* .rce-dropdown-item, */
+.rce-dropdown-item:hover,
+.rce-dropdown-item:focus,
+.rce-dropdown-item:active {
+	color: #238e52 !important;
+}
+
+/* Links, spans, and buttons inside dropdown items */
+/* .rce-dropdown a, */
+.rce-dropdown a:hover,
+.rce-dropdown a:focus,
+.rce-dropdown a:active,
+/* .rce-container-dropdown a, */
+.rce-container-dropdown a:hover,
+.rce-container-dropdown a:focus,
+.rce-container-dropdown a:active,
+/* .rce-dropdown-item a, */
+.rce-dropdown-item a:hover,
+.rce-dropdown-item a:focus,
+.rce-dropdown-item a:active,
+/* .rce-dropdown-item span, */
+.rce-dropdown-item span:hover,
+/* .rce-dropdown-item button, */
+.rce-dropdown-item hr:hover,
+.rce-dropdown-item button:hover {
+	color: #238e52 !important;
+}

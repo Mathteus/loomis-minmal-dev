@@ -1,0 +1,109 @@
+'use server';
+import { cookies } from 'next/headers';
+import { DashboardHomeProps } from '@/app/(private)/dashboard/page';
+import { ServerFailed } from '@/errors/generics';
+import { Service } from '@/components/dashboard/recent-messages-table';
+import { Task } from '@/components/dashboard/tasks-card';
+import { fecthRequest } from '../config';
+
+export interface IHomeDashboardResponse {
+	data: DashboardHomeProps;
+}
+
+export async function getHomeInfos(): Promise<DashboardHomeProps> {
+	const cookieStore = await cookies();
+	const response = await fecthRequest({
+		url: '/dashboard/home',
+		method: 'GET',
+		token: `Bearer ${cookieStore.get('access_token')?.value}`,
+	});
+
+	if (response.status === 200) {
+		const data = (await response.json()) as DashboardHomeProps;
+		console.log(JSON.stringify(data));
+		return data;
+	}
+
+	const randomNumber = (max: number, min = 0) => {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	};
+
+	const makeDelay = (ms: number = 1000): Promise<void> => {
+		return new Promise((resolve) => setTimeout(resolve, ms));
+	};
+
+	const tasks: Task[] = [
+		{
+			iconLink: 'https://github.com/mathteus.png',
+			label: 'Tarefa da sprint',
+			username: 'Samuel Lopes',
+			time: new Date('2025-08-15T13:00:00'),
+		},
+		{
+			iconLink: 'https://github.com/mathteus.png',
+			label: 'Tarefa da sprint',
+			username: 'Heloísa Ribeiro',
+			time: new Date('2025-06-15T13:00:00'),
+		},
+		{
+			iconLink: 'https://github.com/mathteus.png',
+			label: 'Tarefa da sprint',
+			username: 'Amanda Souza',
+			time: new Date('2025-10-15T13:00:00'),
+		},
+	];
+
+	const services: Service[] = [
+		{
+			usuario: 'Heloísa Ribeiro',
+			status: 'Aguardando resposta',
+			mensagem: 'Lorem ipsum dolor sit amet consectetu...',
+		},
+		{
+			usuario: 'Samuel Lopes',
+			status: 'Aguardando resposta',
+			mensagem: 'Lorem ipsum dolor sit amet consectetu...',
+		},
+		{
+			usuario: 'Amanda Souza',
+			status: 'Respondido',
+			mensagem: 'Lorem ipsum dolor sit amet consectetu...',
+		},
+		{
+			usuario: 'Letícia Nascimento',
+			status: 'Respondido',
+			mensagem: 'Lorem ipsum dolor sit amet consectetu...',
+		},
+		{
+			usuario: 'Felipe Cardoso',
+			status: 'Respondido',
+			mensagem: 'Lorem ipsum dolor sit amet consectetu...',
+		},
+	];
+
+	const MetricCardInfos = [
+		'+17 em relação ao último mês',
+		'em relação ao último mês',
+		'Clique para visualizar as tarefas',
+	];
+
+	const serviceBarNumber = [
+		{ nome: 'Seg', atendimentos: randomNumber(30, 1) },
+		{ nome: 'Ter', atendimentos: randomNumber(30, 1) },
+		{ nome: 'Qua', atendimentos: randomNumber(30, 1) },
+		{ nome: 'Qui', atendimentos: randomNumber(30, 1) },
+		{ nome: 'Sex', atendimentos: randomNumber(30, 1) },
+		{ nome: 'Sab', atendimentos: randomNumber(30, 1) },
+		{ nome: 'Dom', atendimentos: randomNumber(30, 1) },
+	];
+
+	await makeDelay(500);
+	return {
+		tasks,
+		service: services,
+		MetricCardInfos,
+		serviceBarNumbers: serviceBarNumber,
+	};
+
+	// throw new ServerFailed();
+}

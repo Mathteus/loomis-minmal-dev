@@ -1,0 +1,23 @@
+.HideScroolBar::-webkit-scrollbar {
+	display: none;
+}
+
+.HideScroolBar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+/* .cutText {
+  width: 200px;          /* largura máxima do container 
+  white-space: nowrap;   /* impede quebra de linha 
+  overflow: hidden;      /* esconde o que passar da largura 
+  text-overflow: ellipsis; /* coloca as reticências (…) 
+} */
+
+.cutText {
+	display: block; /* importante */
+	min-width: 0; /* <— chave dentro de flex/grid */
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
