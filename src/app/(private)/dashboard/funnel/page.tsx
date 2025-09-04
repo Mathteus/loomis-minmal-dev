@@ -24,8 +24,10 @@ import { Pipe, PipeItem } from '@/components/dashboard/funnel/pipe';
 import { useFunnelData } from '@/hooks/use-funnel-data';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { toast } from 'sonner';
+import { useRequireAuth } from '@/hooks/use-require-auth';
 
 export default function FunnelPage() {
+	useRequireAuth();
 	const [showNewOpportunity, setModalNewOpportunity] = useState<boolean>(false);
 	const [showPipeItem, setModalPipeItem] = useState<boolean>(false);
 	const [showCreatePipe, setModalCreatePipe] = useState<boolean>(false);
