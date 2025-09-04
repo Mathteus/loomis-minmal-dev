@@ -46,6 +46,7 @@ export default function YourSquadPage() {
 	const isSubmit = watch('isSubmit') ?? false;
 	const { isPending, mutateAsync } = useMutation({
 		mutationFn: async (newAccount: IAccountSignup) => {
+			// eslint-disable-next-line @typescript-eslint/await-thenable
 			await registerAccount(newAccount);
 		},
 		onError: (err) => {

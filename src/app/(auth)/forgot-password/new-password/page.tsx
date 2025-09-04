@@ -49,6 +49,7 @@ export default function NewPasswordPage() {
 	const { isPending, mutateAsync } = useMutation({
 		mutationKey: ['verify-email'],
 		mutationFn: async (newPassword: string) => {
+			// eslint-disable-next-line @typescript-eslint/await-thenable
 			await resetPassword(newPassword);
 		},
 		onError: (err: Error) => {

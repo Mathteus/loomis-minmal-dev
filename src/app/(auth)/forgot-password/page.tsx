@@ -26,6 +26,7 @@ export default function ForgotPasswordPage() {
 	const { isPending, mutateAsync } = useMutation({
 		mutationKey: ['verify-email'],
 		mutationFn: async (formData: UserUpdate) => {
+			// eslint-disable-next-line @typescript-eslint/await-thenable
 			await forgetPassword(formData);
 		},
 		onSuccess: () => {

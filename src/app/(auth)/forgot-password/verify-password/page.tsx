@@ -19,6 +19,7 @@ export default function VerifyPasswordCodePage() {
 	const { isPending, mutateAsync } = useMutation({
 		mutationKey: ['verify-email'],
 		mutationFn: async (recoveryCode: string) => {
+			// eslint-disable-next-line @typescript-eslint/await-thenable
 			await verifyCode(recoveryCode);
 		},
 		onSuccess: () => {

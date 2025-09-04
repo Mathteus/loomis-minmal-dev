@@ -69,8 +69,9 @@ export default function FirstAccessPage() {
 	});
 	const { errors } = formState;
 	const { isError, error, isPending, mutateAsync } = useMutation({
-		mutationFn: (currentUser: IHandlerNextStep) => {
-			verifyCrendentials(currentUser.username, currentUser.email);
+		mutationFn: async (currentUser: IHandlerNextStep) => {
+			// eslint-disable-next-line @typescript-eslint/await-thenable
+			return await verifyCrendentials(currentUser.username, currentUser.email);
 		},
 		onSuccess: () => {
 			setSelfData({
