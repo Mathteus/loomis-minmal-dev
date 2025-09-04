@@ -50,7 +50,7 @@ export function EnhancedNewOpportunityModal({
   });
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [amountRaw, setAmountRaw] = useState('');
-  const [tagInput, setTagInput] = useState('');
+  const [tagText, setTagText] = useState('');
 
   useEffect(() => {
     fetchCollaborators().then(setCollaborators);
@@ -74,35 +74,8 @@ export function EnhancedNewOpportunityModal({
         collaboratorId: '',
       });
       setAmountRaw('');
-      setTagInput('');
+      setTagText('');
     }
-  };
-
-  const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const newTag = tagInput.trim();
-      if (newTag && !formData.tags.includes(newTag)) {
-        setFormData(prev => ({
-          ...prev,
-          tags: [...prev.tags, newTag]
-        }));
-        setTagInput('');
-      }
-    } else if (e.key === 'Backspace' && tagInput === '' && formData.tags.length > 0) {
-      // Remove last tag if backspace is pressed on empty input
-      setFormData(prev => ({
-        ...prev,
-        tags: prev.tags.slice(0, -1)
-      }));
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }));
   };
 
   const { data, isLoading } = useQuery({
@@ -219,60 +192,57 @@ export function EnhancedNewOpportunityModal({
             onChange={(e) => {
               const raw = e.target.value.replace(/\D/g, '');
               setAmountRaw(raw);
+            }}
+            onBlur={() =>
               setFormData((prev) => ({
                 ...prev,
-                amount: MoneyMask(raw),
-              }));
-            }}
+                amount: MoneyMask(amountRaw),
+              }))
+            }
           />
         </div>
 
         <div>
           <h2 className="text-gray-600 text-small-loomis p-2 pl-0">Tags</h2>
-          
-          {/* Tags Display */}
-          <div className="flex flex-wrap gap-2 mb-3 p-3 border border-gray-200 rounded-lg bg-gray-50 min-h-[44px]">
+          <div className="flex flex-wrap gap-2 mb-3">
             {formData.tags.map((tag, index) => (
               <span
                 key={index}
-                className="inline-flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium"
+                className="bg-green-loomis-light text-green-loomis py-1 px-3 text-details-loomis rounded-2xl inline-flex items-center gap-1"
               >
                 {tag}
                 <button
                   type="button"
-                  onClick={() => removeTag(tag)}
-                  className="ml-1 hover:bg-green-200 rounded-full p-0.5 transition-colors"
+                  onClick={() => 
+                    setFormData(prev => ({
+                      ...prev,
+                      tags: prev.tags.filter((_, i) => i !== index)
+                    }))
+                  }
+                  className="ml-1 hover:bg-green-loomis hover:text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
                 >
-                  <X size={12} />
+                  ×
                 </button>
               </span>
             ))}
           </div>
-
-          {/* Tag Input */}
           <LoomisInputText
-            value={tagInput}
-            placeholder="Digite uma tag e pressione Enter ou vírgula"
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={handleTagInput}
-            className="w-full"
-          />
-          <p className="text-gray-400 mt-1 text-details-loomis">
-            Use Enter ou vírgula (,) para adicionar tags. Backspace para remover a última tag.
-          </p>
-        </div>
-
-        <div>
-          <h2 className="text-gray-600 text-small-loomis p-2 pl-0">Mensagem (Opcional)</h2>
-          <LoomisInputText
-            value={formData.message}
-            placeholder="Descreva a oportunidade..."
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                message: e.target.value
-              }))
-            }
+            value={tagText}
+            placeholder="Digite as tags e pressione Enter ou vírgula"
+            onChange={(e) => setTagText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                const newTag = tagText.trim();
+                if (newTag) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    tags: [...prev.tags, newTag],
+                  }));
+                  setTagText('');
+                }
+              }
+            }}
           />
         </div>
       </main>
