@@ -52,6 +52,7 @@ export function NewOpportunityModal({
 	const [tagText, setTagText] = useState('');
 
 	useEffect(() => {
+		// eslint-disable-next-line @typescript-eslint/no-floating-promises
 		fetchCollaborators().then(setCollaborators);
 	}, []);
 
@@ -182,23 +183,24 @@ export function NewOpportunityModal({
 					<LoomisInputText
 						type='text'
 						placeholder={toMoney(0)}
-						value={MoneyMask(amountRaw)}
+						defaultValue={MoneyMask(amountRaw)}
 						onChange={(e) => {
 							const raw = e.target.value.replace(/\D/g, '');
 							setAmountRaw(raw);
 						}}
-						onBlur={() =>
+						onBlur={(e) => {
+							const raw = e.target.value.replace(/\D/g, '');
+							setAmountRaw(raw);
 							setFormData((prev) => ({
 								...prev,
-								amount: MoneyMask(amountRaw),
-							}))
-						}
+								amount: MoneyMask(raw),
+							}));
+						}}
 					/>
 				</div>
 				<div>
 					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Tags</h2>
 					<LoomisInputText
-						value={tagText}
 						placeholder='Digite as tags e pressione Enter ou vírgula'
 						onChange={(e) => setTagText(e.target.value)}
 						onKeyDown={(e) => {
