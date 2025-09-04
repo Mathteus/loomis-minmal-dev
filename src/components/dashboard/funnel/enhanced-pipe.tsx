@@ -66,7 +66,7 @@ export function EnhancedPipe({
         >
           {items.map((item) => (
             <EnhancedDraggableItem
-              key={item.id}
+              key={`item-${item.id}-${items.length}`}
               item={item}
               onItemClick={() => openProfilePipe(item)}
             />
