@@ -81,7 +81,7 @@ export default function FunnelPage() {
   }
 
   return (
-    <main className="flex-1 p-6 space-y-6 bg-gray-50 w-full dashboard-main">
+    <main className="flex-1 p-6 space-y-6 bg-gray-50 w-full dashboard-main overflow-y-auto">
       {/* Header */}
       <section className="flex items-center justify-between">
         <h1 className="text-title-loomis">Funil de vendas</h1>

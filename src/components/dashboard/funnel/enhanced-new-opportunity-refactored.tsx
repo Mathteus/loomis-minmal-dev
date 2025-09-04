@@ -98,14 +98,17 @@ export function EnhancedNewOpportunityModal({
   }, [handleAddTag]);
 
   const handleSubmit = useCallback(() => {
+    console.log('handleSubmit called with formData:', formData);
     if (formData.username && formData.phone && formData.amount && onSubmit) {
-      onSubmit({
+      const opportunityData = {
         username: formData.username,
         phone: formData.phone,
         amount: formData.amount,
         message: formData.message || 'Nova oportunidade criada',
         tags: formData.tags,
-      });
+      };
+      console.log('Calling onSubmit with:', opportunityData);
+      onSubmit(opportunityData);
       
       // Reset form
       setFormData({
@@ -118,6 +121,13 @@ export function EnhancedNewOpportunityModal({
       });
       setTagInput('');
       onClose();
+    } else {
+      console.log('Form validation failed:', {
+        username: formData.username,
+        phone: formData.phone,
+        amount: formData.amount,
+        onSubmit: !!onSubmit
+      });
     }
   }, [formData, onSubmit, onClose]);
 

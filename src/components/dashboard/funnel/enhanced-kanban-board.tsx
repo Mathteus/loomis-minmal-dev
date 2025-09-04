@@ -118,7 +118,7 @@ export function EnhancedKanbanBoard({ openProfilePipe }: EnhancedKanbanBoardProp
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 p-4 h-full overflow-x-auto min-h-[600px]">
+      <div className="flex gap-4 p-4 funnel-container overflow-x-auto min-h-[600px]">
         {columns.map((column) => (
           <SortableContext
             key={column.id}

@@ -190,6 +190,7 @@ export function useFunnelData() {
 
   // Add new opportunity
   const addOpportunity = (opportunity: Omit<PipeItem, 'id'>) => {
+    console.log('addOpportunity called with:', opportunity);
     const newOpportunity: PipeItem = {
       ...opportunity,
       id: Date.now().toString()
@@ -205,6 +206,7 @@ export function useFunnelData() {
       return column;
     });
     
+    console.log('Updated columns:', updatedColumns);
     updateColumnValues(updatedColumns);
   };
 
