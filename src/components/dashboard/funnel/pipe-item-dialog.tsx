@@ -3,31 +3,84 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
+import { PipeItem } from './pipe';
 
 interface IPipeItemDialogProps {
 	onClose: () => void;
 	show: boolean;
+	item?: PipeItem;
 }
 
 export default function PipeItemDialog({
 	onClose,
 	show,
+	item,
 }: IPipeItemDialogProps) {
 	return (
 		<Dialog open={show} onOpenChange={onClose}>
 			<DialogContent className='p-0 min-w-4xl rounded-2xl overflow-hidden shadow-xl'>
-				<div className='flex items-center justify-between px-6 py-4'>
+				<div className='flex items-center justify-between px-6 py-4 bg-green-loomis'>
 					<h2 className='text-white text-lg font-semibold'>
-						Nova oportunidade
+						{item ? item.username : 'Detalhes da oportunidade'}
 					</h2>
 					<button
 						onClick={onClose}
 						aria-label='Fechar'
-						className='text-gray-400 hover:text-gray-200 transition-colors'>
+						className='text-gray-200 hover:text-white transition-colors'>
 						<X className='w-5 h-5' />
 					</button>
 				</div>
 				<div className='bg-white grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-gray-200'>
+					<div className='md:col-span-4 p-6'>
+						<div className='flex flex-col space-y-6'>
+							<div className='flex items-center space-x-4'>
+								<Avatar className='w-16 h-16'>
+									<AvatarImage
+										src='/placeholder-avatar.jpg'
+										alt={item?.username || 'Avatar'}
+									/>
+									<AvatarFallback className='bg-green-loomis text-white text-lg'>
+										{item?.username ? item.username.charAt(0).toUpperCase() : 'U'}
+									</AvatarFallback>
+								</Avatar>
+								<div>
+									<h3 className='text-lg font-semibold text-gray-900'>
+										{item?.username || 'Nome do cliente'}
+									</h3>
+									<p className='text-sm text-gray-500'>
+										{item?.phone || 'Telefone não informado'}
+									</p>
+								</div>
+							</div>
+
+							<div className='space-y-4'>
+								<div>
+									<p className='text-sm font-medium text-gray-700 mb-1'>Valor</p>
+									<p className='text-2xl font-bold text-green-loomis'>
+										{item?.amount || 'R$ 0,00'}
+									</p>
+								</div>
+
+								<div>
+									<p className='text-sm font-medium text-gray-700 mb-2'>Tags</p>
+									<div className='flex flex-wrap gap-2'>
+										{item?.tags?.map((tag, index) => (
+											<Badge key={index} variant='secondary' className='bg-green-loomis-light text-green-loomis'>
+												{tag}
+											</Badge>
+										)) || <Badge variant='secondary'>Sem tags</Badge>}
+									</div>
+								</div>
+
+								<div>
+									<p className='text-sm font-medium text-gray-700 mb-2'>Mensagem</p>
+									<p className='text-sm text-gray-600 bg-gray-50 p-3 rounded-lg'>
+										{item?.message || 'Nenhuma mensagem disponível'}
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
 					<div className='md:col-span-4 p-6 space-y-6'>
 						<div className='border border-gray-200 rounded-xl overflow-hidden'>
 							<div className='flex flex-col items-center p-6 space-y-4'>

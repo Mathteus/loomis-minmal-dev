@@ -20,90 +20,11 @@ import {
 import PipeItemDialog from '@/components/dashboard/funnel/pipe-item-dialog';
 import { CreatePipe } from '@/components/dashboard/funnel/create-pipe';
 import ConfigColumnsDialog from '@/components/dashboard/funnel/config-pipes';
-import { Pipe } from '@/components/dashboard/funnel/pipe';
+import { Pipe, PipeItem } from '@/components/dashboard/funnel/pipe';
+import { useFunnelData } from '@/hooks/use-funnel-data';
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { toast } from 'sonner';
 
-const pipesMock = [
-	{
-		title: 'Abordagem',
-		Value: 'R$ 24.000,00',
-		notify: 3,
-		colorHead: '#000',
-		items: [
-			{
-				username: 'Henrique Souza',
-				phone: '(11) 98745-6123',
-				amount: 'R$ 4.000,00',
-				message:
-					'Olá! Aqui é o Henrique. Gostaria de entender melhor quais soluções sua empresa oferece para utilizar em meus negócios',
-				tags: ['Whatsapp'],
-			},
-			{
-				username: 'Henrique Souza',
-				phone: '(11) 98745-6123',
-				amount: 'R$ 4.000,00',
-				message:
-					'Olá! Aqui é o Henrique. Gostaria de entender melhor quais soluções sua empresa oferece para utilizar em meus negócios',
-				tags: ['Whatsapp'],
-			},
-			{
-				username: 'Henrique Souza',
-				phone: '(11) 98745-6123',
-				amount: 'R$ 4.000,00',
-				message:
-					'Olá! Aqui é o Henrique. Gostaria de entender melhor quais soluções sua empresa oferece para utilizar em meus negócios',
-				tags: ['Whatsapp'],
-			},
-		],
-	},
-	{
-		title: 'Qualificação',
-		Value: 'R$ 10.000,00',
-		colorHead: '#194E37',
-		notify: 3,
-		items: [
-			{
-				username: 'Henrique Souza',
-				phone: '(11) 98745-6123',
-				amount: 'R$ 4.000,00',
-				message:
-					'Olá! Aqui é o Henrique. Gostaria de entender melhor quais soluções sua empresa oferece para utilizar em meus negócios',
-				tags: ['Whatsapp'],
-			},
-			{
-				username: 'Henrique Souza',
-				phone: '(11) 98745-6123',
-				amount: 'R$ 4.000,00',
-				message:
-					'Olá! Aqui é o Henrique. Gostaria de entender melhor quais soluções sua empresa oferece para utilizar em meus negócios',
-				tags: ['Whatsapp'],
-			},
-			{
-				username: 'Henrique Souza',
-				phone: '(11) 98745-6123',
-				amount: 'R$ 4.000,00',
-				message:
-					'Olá! Aqui é o Henrique. Gostaria de entender melhor quais soluções sua empresa oferece para utilizar em meus negócios',
-				tags: ['Whatsapp'],
-			},
-		],
-	},
-	{
-		title: 'Follow Up',
-		Value: 'R$ 800,00',
-		colorHead: '#21814C',
-		notify: 1,
-		items: [
-			{
-				username: 'Henrique Souza',
-				phone: '(11) 98745-6123',
-				amount: 'R$ 4.000,00',
-				message:
-					'Olá! Aqui é o Henrique. Gostaria de entender melhor quais soluções sua empresa oferece para utilizar em meus negócios',
-				tags: ['Whatsapp'],
-			},
-		],
-	},
-];
 
 export default function FunnelPage() {
 	const [showNewOpportunity, setModalNewOpportunity] = useState<boolean>(false);
@@ -112,6 +33,72 @@ export default function FunnelPage() {
 	const [showConfigColumns, setModalConfigColumns] = useState<boolean>(false);
 	const [showProfile, setModalProfile] = useState<boolean>(false);
 	const [showPopover, setShowPopover] = useState<boolean>(false);
+	const [selectedItem, setSelectedItem] = useState<PipeItem | null>(null);
+
+	const { 
+		columns, 
+		totalValue, 
+		isLoading, 
+		moveItem, 
+		addOpportunity, 
+		addColumn, 
+		removeItem 
+	} = useFunnelData();
+
+	const handleDragEnd = (event: DragEndEvent) => {
+		const { active, over } = event;
+
+		if (!over) return;
+
+		const activeId = active.id as string;
+		const overId = over.id as string;
+
+		// Find source column
+		const sourceColumn = columns.find(column => 
+			column.items.some(item => item.id === activeId)
+		);
+
+		if (!sourceColumn) return;
+
+		// If dropping on the same column, do nothing
+		if (sourceColumn.id === overId) return;
+
+		// Move item to new column
+		moveItem(activeId, sourceColumn.id, overId);
+		toast.success('Card movido com sucesso!');
+	};
+
+	const handleOpenProfile = (item: PipeItem) => {
+		setSelectedItem(item);
+		setModalProfile(true);
+	};
+
+	const handleNewOpportunity = (opportunityData: Omit<PipeItem, 'id'>) => {
+		addOpportunity(opportunityData);
+		setModalNewOpportunity(false);
+		toast.success('Nova oportunidade adicionada!');
+	};
+
+	const handleCreatePipe = (pipeData: { title: string }) => {
+		addColumn(pipeData);
+		setModalCreatePipe(false);
+		toast.success('Nova coluna criada!');
+	};
+
+	if (isLoading) {
+		return (
+			<main className='p-6 space-y-6 bg-gray-50 w-full'>
+				<div className="animate-pulse space-y-6">
+					<div className="h-8 bg-gray-200 rounded w-1/4"></div>
+					<div className="flex gap-4 h-96">
+						{[1,2,3,4].map(i => (
+							<div key={i} className="w-[16vw] bg-gray-200 rounded-lg"></div>
+						))}
+					</div>
+				</div>
+			</main>
+		);
+	}
 
 	return (
 		<main className='p-6 space-y-6 bg-gray-50 w-full'>
@@ -119,7 +106,7 @@ export default function FunnelPage() {
 				<h1 className='text-title-loomis'>Funil de vendas</h1>
 				<div className='flex items-center gap-2 rounded-md border bg-[#111B210F] px-4 py-2 text-sm text-gray-700 shadow-xs'>
 					<span className='text-gray-600'>Valor total do funil:</span>
-					<strong className='text-gray-900'>R$ 0,00</strong>
+					<strong className='text-gray-900'>R$ {totalValue.toLocaleString('pt-BR')}</strong>
 				</div>
 			</section>
 
@@ -176,26 +163,32 @@ export default function FunnelPage() {
 				</Popover>
 			</section>
 
-			{/* <NoOpportunity /> */}
-			<section className='flex gap-4 h-[80%]'>
-				{pipesMock &&
-					pipesMock.map((e) => {
-						return (
+			{columns.length === 0 && <NoOpportunity />}
+			
+			{columns.length > 0 && (
+				<DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+					<section className='flex gap-4 h-[80%] overflow-x-auto pb-4'>
+						{columns.map((column) => (
 							<Pipe
-								title={e.title}
-								Value={e.Value}
-								notify={e.notify}
-								items={e.items}
-								colorHead={e.colorHead}
-								openProfilePipe={() => setModalProfile(true)}
+								key={column.id}
+								id={column.id}
+								title={column.title}
+								Value={column.value}
+								notify={column.notify}
+								items={column.items}
+								colorHead={column.colorHead}
+								openProfilePipe={handleOpenProfile}
 							/>
-						);
-					})}
-			</section>
+						))}
+					</section>
+				</DndContext>
+			)}
+			
 			{showNewOpportunity && (
 				<NewOpportunityModal
 					show={showNewOpportunity}
 					onClose={() => setModalNewOpportunity(false)}
+					onSubmit={handleNewOpportunity}
 				/>
 			)}
 
@@ -210,6 +203,7 @@ export default function FunnelPage() {
 				<CreatePipe
 					show={showCreatePipe}
 					onClose={() => setModalCreatePipe(false)}
+					onSubmit={handleCreatePipe}
 				/>
 			)}
 
@@ -220,10 +214,11 @@ export default function FunnelPage() {
 				/>
 			)}
 
-			{showProfile && (
+			{showProfile && selectedItem && (
 				<PipeItemDialog
 					show={showProfile}
 					onClose={() => setModalProfile(false)}
+					item={selectedItem}
 				/>
 			)}
 		</main>

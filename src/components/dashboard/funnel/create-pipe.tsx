@@ -14,10 +14,18 @@ import { useState } from 'react';
 export interface ICreatePipeProps {
 	onClose: () => void;
 	show: boolean;
+	onSubmit?: (data: { title: string }) => void;
 }
 
-export function CreatePipe({ onClose, show }: ICreatePipeProps) {
+export function CreatePipe({ onClose, show, onSubmit }: ICreatePipeProps) {
 	const [pipeName, setPipeName] = useState<string>('');
+	
+	const handleSubmit = () => {
+		if (pipeName.trim() && onSubmit) {
+			onSubmit({ title: pipeName.trim() });
+			setPipeName('');
+		}
+	};
 	return (
 		<Dialog open={show} onOpenChange={onClose}>
 			<DialogContent>
@@ -41,7 +49,11 @@ export function CreatePipe({ onClose, show }: ICreatePipeProps) {
 							Cancel
 						</Button>
 					</DialogClose>
-					<LoomisButton className='w-max' type='submit' disabled={!pipeName}>
+					<LoomisButton 
+						className='w-max' 
+						type='submit' 
+						disabled={!pipeName.trim()}
+						onClick={handleSubmit}>
 						Criar Funil
 					</LoomisButton>
 				</DialogFooter>

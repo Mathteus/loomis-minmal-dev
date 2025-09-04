@@ -22,15 +22,45 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MoneyMask, toMoney } from '@/utils/utilities';
 import { useState } from 'react';
 
+import { PipeItem } from './pipe';
+
 interface INewOpportunityModalProps {
 	onClose: () => void;
 	show: boolean;
+	onSubmit?: (data: Omit<PipeItem, 'id'>) => void;
 }
 
 export function NewOpportunityModal({
 	onClose,
 	show,
+	onSubmit,
 }: INewOpportunityModalProps) {
+	const [formData, setFormData] = useState({
+		username: '',
+		phone: '',
+		amount: '',
+		message: '',
+		tags: ['Novo Lead']
+	});
+
+	const handleSubmit = () => {
+		if (formData.username && formData.phone && formData.amount && onSubmit) {
+			onSubmit({
+				username: formData.username,
+				phone: formData.phone,
+				amount: formData.amount,
+				message: formData.message || 'Nova oportunidade criada',
+				tags: formData.tags
+			});
+			setFormData({
+				username: '',
+				phone: '',
+				amount: '',
+				message: '',
+				tags: ['Novo Lead']
+			});
+		}
+	};
 	const { data, isLoading } = useQuery({
 		queryKey: ['contacts'],
 		queryFn: getContacts,
@@ -80,15 +110,21 @@ export function NewOpportunityModal({
 	};
 
 	const BodyDialog = () => {
-		const [amount, setAmount] = useState<string>('');
-
 		return (
 			<main className='flex flex-col gap-4'>
 				<hr className='border-gray-200 my-4' />
 
 				<div>
 					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Cliente</h2>
-					<Select>
+					<Select onValueChange={(value) => {
+						// Find the contact by name and set both username and phone
+						const contact = data?.find(contact => contact.name === value);
+						setFormData(prev => ({ 
+							...prev, 
+							username: value,
+							phone: contact?.phone || ''
+						}));
+					}}>
 						<SelectTrigger className='w-full cursor-pointer'>
 							<SelectValue placeholder='Selecione uma opção' />
 						</SelectTrigger>
@@ -105,14 +141,14 @@ export function NewOpportunityModal({
 				</div>
 				<div>
 					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>
-						Colaborardo Vinculado
+						Colaborador Vinculado
 					</h2>
 					<Select>
 						<SelectTrigger className='w-full cursor-pointer'>
 							<SelectValue placeholder='Selecione uma opção' />
 						</SelectTrigger>
 						<SelectContent>
-							{/* TODO: Adicionar lista de Colaborardo Vinculado */}
+							{/* TODO: Adicionar lista de Colaborador Vinculado */}
 						</SelectContent>
 					</Select>
 				</div>
@@ -121,13 +157,22 @@ export function NewOpportunityModal({
 					<LoomisInputText
 						type='text'
 						placeholder={toMoney(0)}
-						onChange={(e) => setAmount(MoneyMask(e.target.value))}
-						value={amount}
+						onChange={(e) => {
+							const value = MoneyMask(e.target.value);
+							setFormData(prev => ({ ...prev, amount: value }));
+						}}
+						value={formData.amount}
 					/>
 				</div>
 				<div>
 					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Tags</h2>
-					<LoomisInputText />
+					<LoomisInputText
+						placeholder="Digite as tags separadas por vírgula"
+						onChange={(e) => setFormData(prev => ({ 
+							...prev, 
+							tags: e.target.value.split(',').map(tag => tag.trim()).filter(Boolean) 
+						}))}
+					/>
 				</div>
 			</main>
 		);
@@ -148,8 +193,12 @@ export function NewOpportunityModal({
 							Cancel
 						</Button>
 					</DialogClose>
-					<LoomisButton className='w-max' type='submit'>
-						Adcionar oportunidade
+					<LoomisButton 
+						className='w-max' 
+						type='submit'
+						disabled={!formData.username || !formData.amount}
+						onClick={handleSubmit}>
+						Adicionar oportunidade
 					</LoomisButton>
 				</DialogFooter>
 			</DialogContent>
