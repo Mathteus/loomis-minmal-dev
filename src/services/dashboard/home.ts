@@ -1,29 +1,12 @@
-'use server';
-import { cookies } from 'next/headers';
 import { DashboardHomeProps } from '@/app/(private)/dashboard/page';
-import { ServerFailed } from '@/errors/generics';
 import { Service } from '@/components/dashboard/recent-messages-table';
 import { Task } from '@/components/dashboard/tasks-card';
-import { fecthRequest } from '../config';
 
 export interface IHomeDashboardResponse {
 	data: DashboardHomeProps;
 }
 
 export async function getHomeInfos(): Promise<DashboardHomeProps> {
-	const cookieStore = await cookies();
-	const response = await fecthRequest({
-		url: '/dashboard/home',
-		method: 'GET',
-		token: `Bearer ${cookieStore.get('access_token')?.value}`,
-	});
-
-	if (response.status === 200) {
-		const data = (await response.json()) as DashboardHomeProps;
-		console.log(JSON.stringify(data));
-		return data;
-	}
-
 	const randomNumber = (max: number, min = 0) => {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	};
@@ -104,6 +87,4 @@ export async function getHomeInfos(): Promise<DashboardHomeProps> {
 		MetricCardInfos,
 		serviceBarNumbers: serviceBarNumber,
 	};
-
-	// throw new ServerFailed();
 }
