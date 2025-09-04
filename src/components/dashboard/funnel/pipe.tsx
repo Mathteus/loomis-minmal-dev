@@ -62,6 +62,7 @@ export function Pipe({
 			</section>
 			<section>
 				<SortableContext
+					id={id}
 					items={items.map((item) => item.id)}
 					strategy={verticalListSortingStrategy}>
 					{items.map((item) => (

@@ -41,7 +41,6 @@ export default function FunnelPage() {
 		moveItem,
 		addOpportunity,
 		addColumn,
-		removeItem,
 	} = useFunnelData();
 
 	const handleDragEnd = (event: DragEndEvent) => {
@@ -50,7 +49,11 @@ export default function FunnelPage() {
 		if (!over) return;
 
 		const activeId = active.id as string;
-		const overId = over.id as string;
+		type OverData = { sortable: { containerId: string } };
+		const containerId = (over.data.current as OverData | undefined)?.sortable
+			.containerId;
+
+		if (!containerId) return;
 
 		// Find source column
 		const sourceColumn = columns.find((column) =>
@@ -60,10 +63,10 @@ export default function FunnelPage() {
 		if (!sourceColumn) return;
 
 		// If dropping on the same column, do nothing
-		if (sourceColumn.id === overId) return;
+		if (sourceColumn.id === containerId) return;
 
 		// Move item to new column
-		moveItem(activeId, sourceColumn.id, overId);
+		moveItem(activeId, sourceColumn.id, containerId);
 		toast.success('Card movido com sucesso!');
 	};
 

@@ -20,7 +20,11 @@ import { getContacts } from '@/services/dashboard/chat/contacts';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MoneyMask, toMoney } from '@/utils/utilities';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+	fetchCollaborators,
+	Collaborator,
+} from '@/services/dashboard/funnel/collaborators';
 
 import { PipeItem } from './pipe';
 
@@ -41,7 +45,15 @@ export function NewOpportunityModal({
 		amount: '',
 		message: '',
 		tags: ['Novo Lead'],
+		collaboratorId: '',
 	});
+	const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+	const [amountRaw, setAmountRaw] = useState('');
+	const [tagText, setTagText] = useState('');
+
+	useEffect(() => {
+		fetchCollaborators().then(setCollaborators);
+	}, []);
 
 	const handleSubmit = () => {
 		if (formData.username && formData.phone && formData.amount && onSubmit) {
@@ -58,7 +70,10 @@ export function NewOpportunityModal({
 				amount: '',
 				message: '',
 				tags: ['Novo Lead'],
+				collaboratorId: '',
 			});
+			setAmountRaw('');
+			setTagText('');
 		}
 	};
 	const { data, isLoading } = useQuery({
@@ -70,13 +85,11 @@ export function NewOpportunityModal({
 		return (
 			<>
 				{data ? (
-					data.map((e) => {
-						return (
-							<SelectItem className='cursor-pointer' value={e.name}>
-								{e.name}
-							</SelectItem>
-						);
-					})
+					data.map((e) => (
+						<SelectItem key={e.id} className='cursor-pointer' value={e.name}>
+							{e.name}
+						</SelectItem>
+					))
 				) : (
 					<></>
 				)}
@@ -117,8 +130,8 @@ export function NewOpportunityModal({
 				<div>
 					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Cliente</h2>
 					<Select
+						value={formData.username}
 						onValueChange={(value) => {
-							// Find the contact by name and set both username and phone
 							const contact = data?.find((contact) => contact.name === value);
 							setFormData((prev) => ({
 								...prev,
@@ -144,12 +157,23 @@ export function NewOpportunityModal({
 					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>
 						Colaborador Vinculado
 					</h2>
-					<Select>
+					<Select
+						value={formData.collaboratorId}
+						onValueChange={(value) =>
+							setFormData((prev) => ({
+								...prev,
+								collaboratorId: value,
+							}))
+						}>
 						<SelectTrigger className='w-full cursor-pointer'>
 							<SelectValue placeholder='Selecione uma opção' />
 						</SelectTrigger>
 						<SelectContent>
-							{/* TODO: Adicionar lista de Colaborador Vinculado */}
+							{collaborators.map((c) => (
+								<SelectItem key={c.id} className='cursor-pointer' value={c.id}>
+									{c.name}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 				</div>
@@ -158,26 +182,38 @@ export function NewOpportunityModal({
 					<LoomisInputText
 						type='text'
 						placeholder={toMoney(0)}
+						value={MoneyMask(amountRaw)}
 						onChange={(e) => {
-							const value = MoneyMask(e.target.value);
-							setFormData((prev) => ({ ...prev, amount: value }));
+							const raw = e.target.value.replace(/\D/g, '');
+							setAmountRaw(raw);
 						}}
-						value={formData.amount}
+						onBlur={() =>
+							setFormData((prev) => ({
+								...prev,
+								amount: MoneyMask(amountRaw),
+							}))
+						}
 					/>
 				</div>
 				<div>
 					<h2 className='text-gray-600 text-small-loomis p-2 pl-0'>Tags</h2>
 					<LoomisInputText
-						placeholder='Digite as tags separadas por vírgula'
-						onChange={(e) =>
-							setFormData((prev) => ({
-								...prev,
-								tags: e.target.value
-									.split(',')
-									.map((tag) => tag.trim())
-									.filter(Boolean),
-							}))
-						}
+						value={tagText}
+						placeholder='Digite as tags e pressione Enter ou vírgula'
+						onChange={(e) => setTagText(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ',') {
+								e.preventDefault();
+								const newTag = tagText.trim();
+								if (newTag) {
+									setFormData((prev) => ({
+										...prev,
+										tags: [...prev.tags, newTag],
+									}));
+									setTagText('');
+								}
+							}
+						}}
 					/>
 				</div>
 			</main>

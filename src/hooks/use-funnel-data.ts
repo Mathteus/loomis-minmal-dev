@@ -124,7 +124,7 @@ export function useFunnelData() {
 		try {
 			const stored = localStorage.getItem(STORAGE_KEY);
 			if (stored) {
-				const parsedData = JSON.parse(stored) as FunnelColumn[];
+				const parsedData = JSON.parse(stored) as unknown as FunnelColumn[];
 				setColumns(parsedData);
 			}
 		} catch (error) {
